@@ -32,7 +32,7 @@ This is a model built from public reports and published Shenzhou return-sequence
 | `out/sz20_map.png`, `out/sz20_profile.png` | figures above |
 | `tools/export_mission.py` | builds `docs/data/sz20.json` (tracks, events, DE440s Sun table, element sets) and `docs/data/profiles.json` |
 | `tools/plot_map.py`, `tools/plot_profile.py` | figures |
-| `docs/` | the 3D page (three.js vendored, Blue Marble tiles, Natural Earth boundaries, city catalog, sky chart) |
+| `docs/` | the 3D page (three.js vendored, Blue Marble tiles, Natural Earth boundaries, city catalog, sky chart; `globe-math.js` / `globe-camera.js` are the view-point, heading, tilt and range camera from CZ-6A) |
 | `docs/model.html` | write-up of the methodology, the Shenzhou-20 inputs and results (web-sized figures in `docs/img/`) |
 | `tests/` | schema tests (`node --test`), headless-Chrome smoke test, static server |
 
@@ -168,7 +168,13 @@ node tests/serve.mjs 8767          # or: python3 -m http.server 8767 --bind 127.
   lighting and the range to the site; the "Reconstruction vs reported" table summarises the solution.
 - Element sets: the observed pre-burn Space-Track set and the model deorbit ellipse at burn cutoff (perigee below the
   surface, placeholder catalog number 00000).
-- URL parameters restore a view, e.g. `?mission=sz20&met=1850&cam=92,40.5,1.5&sky=Jiuquan`.
+- **Drag** the globe to turn it; the grabbed ground follows the pointer. **Right-drag**, Ctrl/Shift-drag or a **two-finger
+  drag** tilts and rotates the camera around the point at the centre of the view, Google Earth style; a two-finger twist
+  rotates too. Scroll or pinch to zoom toward that point. The camera stays at least 319 km above the surface and within
+  80° of vertical; the camera presets reset to a north-up vertical view. The phone header keeps the UTC date, time and
+  T± on one line with the vehicle name.
+- URL parameters restore a view, e.g. `?mission=sz20&met=1850&cam=92,40.5,1.5&sky=Jiuquan`; `cam` is
+  `lon,lat,dist,heading,tilt` (the last two optional).
 - Imagery, boundaries and cities are the CZ-6A layers (Blue Marble tile pyramid to 21600 px, Natural Earth lines in
   the China-claims view, 138 cities including the Central Asian corridor). Credits and licenses are in `docs/data/*LICENSE*`
   and `docs/tex/TILES-LICENSE.txt`.

@@ -40,8 +40,9 @@ table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:ta
 #credit{position:fixed;right:var(--right);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:15;font-size:9px;color:var(--dim);text-shadow:0 0 3px var(--halo);pointer-events:none}
 #loading{position:fixed;inset:0;background:var(--space);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding-inline:var(--gutter) var(--right);z-index:50;text-align:center}#loading b{color:var(--accent)}#loadmsg{max-width:50ch;color:var(--dim)}
 @media(max-width:1100px){#subt,.cst{display:none}#info{width:310px}#leftcol{width:290px}#legend{font-size:8.5px}}
-@media(max-width:860px){#bar{gap:9px}.utcd,.cst,#ttlsub,#doclink{display:none}#leftcol{display:contents}#ctl,#info{position:fixed;inset:calc(var(--bar) + env(safe-area-inset-top,0px) + 12px) var(--right) auto var(--gutter);width:auto;max-height:calc(100dvh - var(--bar) - 64px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}body:not(.ctl-open) #ctl{display:none}#legend{display:none}#credit{left:var(--gutter);right:var(--right);font-size:8px}#ctl .btn{min-height:36px}#clock{gap:8px}}
-@media(max-width:520px){.utct{display:none}.title{font-size:12px}#clock{font-size:11px}#bar .tog{padding-inline:7px}}
+@media(max-width:860px){#bar{gap:9px}.cst,#ttlsub,#doclink{display:none}#leftcol{display:contents}#ctl,#info{position:fixed;inset:calc(var(--bar) + env(safe-area-inset-top,0px) + 12px) var(--right) auto var(--gutter);width:auto;max-height:calc(100dvh - var(--bar) - 64px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}body:not(.ctl-open) #ctl{display:none}#legend{display:none}#credit{left:var(--gutter);right:var(--right);font-size:8px}#ctl .btn{min-height:36px}#clock{gap:8px}}
+@media(max-width:520px){.utcd .k{display:none}#clock{gap:6px;font-size:clamp(8.5px,2.8vw,11px)}.title{font-size:12px}#bar .tog{padding-inline:7px}}
+@media(max-width:360px){#bar{gap:6px}.title{font-size:11px}}
 </style>
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head>
@@ -52,7 +53,7 @@ table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:ta
 <div id="clock"><span class="utcd"><span class="k">UTC</span> <span id="c-date">—</span></span><span class="utct"><span id="c-utc">—</span>Z</span><span id="c-met">T+00:00:00</span><span class="cst"><span class="k">CST</span> <span id="c-cst">—</span></span></div>
 <button class="btn tog" data-panel="info" aria-label="Toggle flight information" aria-controls="info">ⓘ</button>
 </header>
-<main id="view" aria-label="Interactive Earth and reentry trajectory. Drag to rotate, right-drag or two-finger drag to pan, scroll or pinch to zoom. Click the globe for its sky chart; hover or click the track to inspect time and altitude."></main>
+<main id="view" aria-label="Interactive Earth and reentry trajectory. Drag to turn the globe, right-drag or two-finger drag to tilt and rotate the view around its centre, scroll or pinch to zoom. Click the globe for its sky chart; hover or click the track to inspect time and altitude."></main>
 <div id="leftcol">
 <aside id="ctl" class="panel" aria-label="Return controls">
 <h2>Return mission</h2>
@@ -77,7 +78,7 @@ table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:ta
 <label class="chk"><input id="o-grid" type="checkbox">Graticule</label><label class="chk"><input id="o-cities" type="checkbox">Cities</label>
 <label class="chk"><input id="o-lights" type="checkbox">City lights</label>
 <label class="chk" title="Country borders worldwide; province and region boundaries only in China · China-claims map view"><input id="o-borders" type="checkbox" checked>Borders & regions</label>
-</div><p class="note">Drag to orbit · right-drag or two fingers to pan · scroll or pinch to zoom. Click anywhere on the globe for its sky chart; click the trajectory to seek. Camera presets recenter.</p>
+</div><p class="note">Drag to turn the globe · right-drag or two fingers to tilt and rotate · scroll or pinch to zoom. Click anywhere on the globe for its sky chart; click the trajectory to seek. Presets reset the view.</p>
 </aside>
 <div id="legend" aria-label="Trajectory and solar-line legend"></div>
 </div>

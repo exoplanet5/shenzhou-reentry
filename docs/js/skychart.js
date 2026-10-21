@@ -54,7 +54,7 @@ const CSS = `
 .skc-loc input{width:98px;font:11px ${MONO};font-variant-numeric:tabular-nums;color:#e8eaed;background:#0c1014;border:1px solid #2a323c;border-radius:4px;padding:2px 5px}
 .skc-loc input:focus{outline:none;border-color:#2a7ea8}
 .skc-loc .skc-err{color:#ff5252}
-@media (max-width:860px){.skw{left:max(16px,env(safe-area-inset-left,0px))!important;right:max(16px,env(safe-area-inset-right,0px));width:auto!important;min-width:0;top:calc(62px + env(safe-area-inset-top,0px))!important;height:75dvh!important;min-height:0;resize:none}.skc-toolbar{flex-wrap:wrap;right:6px}.skc-loc input{width:85px}}
+@media (max-width:860px){.skw{left:max(16px,env(safe-area-inset-left,0px))!important;right:max(16px,env(safe-area-inset-right,0px));width:auto!important;min-width:0;top:calc(var(--bar,50px) + 12px + env(safe-area-inset-top,0px))!important;height:75dvh!important;min-height:0;resize:none}.skc-toolbar{flex-wrap:wrap;right:6px}.skc-loc input{width:85px}}
 `;
 
 // styleAt(met, t0ms) -> {color, lit, powered, plasma, hud}; mark: {met, label} drawn inside a pass (e.g. entry interface);

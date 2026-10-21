@@ -24,8 +24,8 @@ export function createMapTiles({scene,camera,renderer,earthMaterial,loadTexture}
     for(let y=0;y<(TILE_CONFIG.baseRows<<z);y++)for(let x=0;x<(TILE_CONFIG.baseColumns<<z);x++){
       const tile=tileBounds(z,x,y),mid=new THREE.Vector3(...llVector((tile.west+tile.east)/2,(tile.south+tile.north)/2));
       const angle=((tile.east-tile.west)+(tile.north-tile.south))*Math.PI/360;
-      tile.score=direction.dot(mid);
-      if(Math.acos(Math.min(1,Math.max(-1,tile.score)))>horizon+angle)continue;
+      if(Math.acos(Math.min(1,Math.max(-1,direction.dot(mid))))>horizon+angle)continue;
+      tile.score=-camera.position.distanceTo(mid);   // nearest ground first in tilted views
       if(!frustum.intersectsSphere(new THREE.Sphere(mid,2*Math.sin(angle/2))))continue;
       tiles.push(tile);
     }
@@ -34,7 +34,7 @@ export function createMapTiles({scene,camera,renderer,earthMaterial,loadTexture}
   function update(now,width,height){
     if(now-last>=160){
       last=now;
-      const key=[...camera.position.toArray(),camera.aspect,width,height,renderer.getPixelRatio()].map((x)=>x.toFixed(4)).join(',');
+      const key=[...camera.position.toArray(),...camera.quaternion.toArray(),camera.aspect,width,height,renderer.getPixelRatio()].map((x)=>x.toFixed(4)).join(',');
       if(key!==lastView){
         lastView=key;camera.updateMatrixWorld();matrix.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);frustum.setFromProjectionMatrix(matrix);
         required=projectedPixels(camera.position.length(),camera.fov,height,renderer.getPixelRatio());

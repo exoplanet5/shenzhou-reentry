@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {Line2} from 'three/addons/lines/Line2.js';
 import {LineGeometry} from 'three/addons/lines/LineGeometry.js';
 import {LineMaterial} from 'three/addons/lines/LineMaterial.js';
@@ -13,6 +12,7 @@ import {validateBoundaries,boundarySegments} from './boundaries.js';
 import {createMapTiles} from './map-tiles.js';
 import {createBoundaryLayer} from './boundary-layer.js';
 import {CITIES,cityInRange} from './cities.js';
+import {GlobeCamera} from './globe-camera.js';
 
 // Reentry viewer: adapted from the CZ-6A launch viewer (exoplanet5/CZ-6A) and the Starship IFT-14 page.
 const $ = (id) => document.getElementById(id);
@@ -60,8 +60,8 @@ async function start() {
   const labels=new CSS2DRenderer(); Object.assign(labels.domElement.style,{position:'absolute',inset:'0',pointerEvents:'none'});view.appendChild(labels.domElement);
   const scene=new THREE.Scene();scene.background=new THREE.Color('#05070a');
   const camera=new THREE.PerspectiveCamera(35,1,0.005,200);
-  const controls=new OrbitControls(camera,renderer.domElement);
-  Object.assign(controls,{enableDamping:true,dampingFactor:.08,screenSpacePanning:true,minDistance:.05,maxDistance:14,maxTargetRadius:.95,zoomSpeed:.9});
+  // Google Earth-style camera: left-drag grabs the globe, right-drag or two fingers tilt and turn about the view point.
+  const cam=new GlobeCamera(camera,renderer.domElement,{onClick:(x,y)=>pick(x,y),onGesture:(kind)=>{if(kind==='drag')setFollow(false);}});
   const materials=new Set(), Y=new THREE.Vector3(0,1,0);
   function line(flat,{color=C.ink,width=1.8,opacity=1,dashed=false}={}) {
     const g=new LineGeometry();g.setPositions(flat);
@@ -148,17 +148,16 @@ async function start() {
   const [home,homeLon,homeLat]=CITIES.find((c)=>c[0]==='Jiuquan');
   $('skybtn').onclick=()=>openSky(skySite||{name:home,lon:homeLon,lat:homeLat},true);
 
-  let fly=null;
   function setFollow(on){state.follow=on;$('o-follow').checked=on;}
   const cameraScale=()=>Math.max(1,1.4/camera.aspect);
-  function flyTo(lon,lat,dist){setFollow(false);const d=clamp(1+(dist-1)*cameraScale(),1.05,14);fly={from:camera.position.clone(),to:new THREE.Vector3(...A.llToVec(lon,lat,d)),target:controls.target.clone(),start:performance.now()};}
+  function flyTo(lon,lat,dist){setFollow(false);cam.flyTo({lon,lat,range:(dist-1)*cameraScale()});}
   function setMet(v){if(!Number.isFinite(v))return;state.met=clamp(v,metMin,MET_END);state.live=false;$('live').classList.remove('on');dirty();}
   function setPlaying(on){if(on){state.live=false;$('live').classList.remove('on');if(state.met>=MET_END)state.met=metMin;}state.playing=on;$('play').textContent=on?'❚❚ Pause':'▶ Play';}
   function setT0(v){if(!Number.isFinite(v))return;state.t0=clamp(v,t0Min,t0Max);$('t0').value=state.t0;onT0Change();}
   function option(select,value,text){const o=document.createElement('option');o.value=value;o.textContent=text;select.appendChild(o);}
   for(const p of index.profiles)option($('profilesel'),p.id,p.label);$('profilesel').value=profile.id;
   for(const m of profile.missions)option($('launchsel'),m.id,m.label);$('launchsel').value=entry.id;
-  function selectMission(p,m){const q=new URLSearchParams(location.search);q.set('profile',p);q.set('mission',m);for(const k of ['t0','met','cam','pan','sky','follow'])q.delete(k);location.search=q;}
+  function selectMission(p,m){const q=new URLSearchParams(location.search);q.set('profile',p);q.set('mission',m);for(const k of ['t0','met','cam','sky','follow'])q.delete(k);location.search=q;}
   $('profilesel').onchange=()=>{const p=index.profiles.find((p)=>p.id===$('profilesel').value);selectMission(p.id,p.default_mission);};
   $('launchsel').onchange=()=>selectMission(profile.id,$('launchsel').value);
   Object.assign($('t0'),{min:t0Min,max:t0Max,value:state.t0});Object.assign($('met'),{min:metMin,max:MET_END,value:state.met});
@@ -173,7 +172,7 @@ async function start() {
   for(const k of Object.keys(state.show)){$('o-'+k).checked=state.show[k];$('o-'+k).onchange=()=>{state.show[k]=$('o-'+k).checked;dirty();};}
   $('o-follow').checked=state.follow;$('o-follow').onchange=()=>setFollow($('o-follow').checked);
   async function copyText(text,button){const old=button.textContent;let copied=false;try{await navigator.clipboard.writeText(text);copied=true;}catch{const box=document.createElement('textarea');box.value=text;document.body.appendChild(box);box.select();copied=document.execCommand('copy');box.remove();}button.textContent=copied?'Copied':'Copy unavailable';if(!copied)message('Clipboard unavailable. Select the text or copy the browser address.');setTimeout(()=>{button.textContent=old;},1600);}
-  function shareURL(){const ll=A.vecToLL(camera.position.x,camera.position.y,camera.position.z),q=new URLSearchParams({profile:profile.id,mission:entry.id,t0:A.fmtHMS(t0ms()),met:state.met.toFixed(3),cam:`${ll.lon.toFixed(3)},${ll.lat.toFixed(3)},${camera.position.length().toFixed(3)}`,follow:state.follow?'1':'0',speed:state.speed});if(controls.target.lengthSq()>1e-8)q.set('pan',controls.target.toArray().map((v)=>v.toFixed(4)).join(','));for(const [k,v]of Object.entries(state.show))q.set(k,v?'1':'0');if(sky.isOpen()&&skySite)q.set('sky',`${skySite.lat.toFixed(4)},${skySite.lon.toFixed(4)}`);return `${location.origin}${location.pathname}?${q}`;}
+  function shareURL(){const v=cam.get(),q=new URLSearchParams({profile:profile.id,mission:entry.id,t0:A.fmtHMS(t0ms()),met:state.met.toFixed(3),cam:`${v.lon.toFixed(3)},${v.lat.toFixed(3)},${(1+v.range).toFixed(3)},${v.heading.toFixed(1)},${v.tilt.toFixed(1)}`,follow:state.follow?'1':'0',speed:state.speed});for(const [k,v]of Object.entries(state.show))q.set(k,v?'1':'0');if(sky.isOpen()&&skySite)q.set('sky',`${skySite.lat.toFixed(4)},${skySite.lon.toFixed(4)}`);return `${location.origin}${location.pathname}?${q}`;}
   $('link').onclick=()=>{const url=shareURL();history.replaceState(null,'',url);copyText(url,$('link'));};$('copytle').onclick=()=>copyText($('tle').textContent,$('copytle'));
   $('events').onclick=(e)=>{const row=e.target.closest('[data-met]');if(row){setPlaying(false);setMet(+row.dataset.met);}};
   $('legend').innerHTML=`<div>${M.flight_segments.map((k)=>`<span><i style="border-color:${data.tracks[k].color}"></i>${esc(data.tracks[k].label)}</span>`).join('')}<span><i style="border-color:${C.plasma};border-top-width:4px"></i>Plasma trail 80–40 km</span><span><i class="d" style="border-color:${C.footprint}"></i>15° elevation circle</span><span><i style="border-color:${C.sun}"></i>Sun 0° terminator</span><span><i style="border-color:${C.accent}"></i>Sun −12° nautical twilight</span><span><b>★</b>Reported landing point</span></div>`;
@@ -217,21 +216,14 @@ async function start() {
     $('status').querySelector('tbody').innerHTML=rows.map(([k,v])=>`<tr><td>${k}</td><td>${esc(v)}</td></tr>`).join('');
     const next=timeline().find((e)=>e.met>state.met);document.querySelectorAll('#events [data-met]').forEach((b)=>{b.closest('tr').classList.toggle('past',+b.dataset.met<=state.met);b.closest('tr').classList.toggle('next',next?.met===+b.dataset.met);});
   }
-  const ray=new THREE.Raycaster(),globe=new THREE.Sphere(new THREE.Vector3(),1),hit=new THREE.Vector3();
   function trackAt(x,y){const r=view.getBoundingClientRect();let nearest=null,best=13;
     for(const tr of flight)for(let i=0;i<tr.n;i+=tr===T.orbit?3:1){const p=new THREE.Vector3(...tr.pt(i,1));if(!visible(p))continue;const q=p.project(camera),d=Math.hypot((q.x+1)*r.width/2+r.left-x,(1-q.y)*r.height/2+r.top-y);if(d<best){best=d;nearest={met:tr.metAt(i),alt:tr.alt[i]};}}
     return nearest;}
-  function groundAt(x,y){const r=view.getBoundingClientRect();ray.setFromCamera({x:(x-r.left)/r.width*2-1,y:1-(y-r.top)/r.height*2},camera);return ray.ray.intersectSphere(globe,hit)?A.vecToLL(hit.x,hit.y,hit.z):null;}
-  const pointers=new Set();let press=null;
-  renderer.domElement.addEventListener('pointerdown',(e)=>{if(e.isPrimary)pointers.clear();pointers.add(e.pointerId);press=pointers.size===1&&e.button===0?{x:e.clientX,y:e.clientY,t:performance.now(),slop:e.pointerType==='mouse'?4:10}:null;fly=null;setFollow(false);});
-  renderer.domElement.addEventListener('pointercancel',(e)=>{pointers.delete(e.pointerId);press=null;});
-  renderer.domElement.addEventListener('pointerup',(e)=>{const p=press;press=null;pointers.delete(e.pointerId);
-    if(!p||Math.hypot(e.clientX-p.x,e.clientY-p.y)>p.slop||performance.now()-p.t>600)return;
-    const track=trackAt(e.clientX,e.clientY);if(track){setPlaying(false);setMet(track.met);return;}
-    const ll=groundAt(e.clientX,e.clientY);if(ll)openSky({lat:+ll.lat.toFixed(4),lon:+ll.lon.toFixed(4),custom:true},false,{x:e.clientX,y:e.clientY});});
+  // A clean click or tap seeks on the trajectory, or opens the sky chart for the ground under the pointer.
+  function pick(x,y){const track=trackAt(x,y);if(track){setPlaying(false);setMet(track.met);return;}const ll=cam.groundAt(x,y);if(ll)openSky({lat:+ll.lat.toFixed(4),lon:+ll.lon.toFixed(4),custom:true},false,{x,y});}
   renderer.domElement.addEventListener('pointerleave',()=>{$('inspect').hidden=true;});
   renderer.domElement.addEventListener('pointermove',(e)=>{if(e.buttons||e.pointerType==='touch')return;const nearest=trackAt(e.clientX,e.clientY);
-    $('inspect').hidden=!nearest;renderer.domElement.style.cursor=nearest?'pointer':groundAt(e.clientX,e.clientY)?'crosshair':'';if(nearest){$('inspect').textContent=`${A.fmtMET(nearest.met)} · ${nearest.alt.toFixed(1)} km\nClick to seek`;Object.assign($('inspect').style,{left:Math.max(16,Math.min(innerWidth-240,e.clientX+15))+'px',top:Math.min(innerHeight-80,e.clientY+15)+'px'});}});
+    $('inspect').hidden=!nearest;renderer.domElement.style.cursor=nearest?'pointer':cam.groundAt(e.clientX,e.clientY)?'crosshair':'';if(nearest){$('inspect').textContent=`${A.fmtMET(nearest.met)} · ${nearest.alt.toFixed(1)} km\nClick to seek`;Object.assign($('inspect').style,{left:Math.max(16,Math.min(innerWidth-240,e.clientX+15))+'px',top:Math.min(innerHeight-80,e.clientY+15)+'px'});}});
   function declutterLabels(){
     const boxes=['ctl','info','legend'].map((id)=>$(id)).filter((el)=>el.getClientRects().length).map((el)=>el.getBoundingClientRect());
     const overlap=(a,b)=>a.left<b.right+4 && a.right+4>b.left && a.top<b.bottom+3 && a.bottom+3>b.top;
@@ -247,11 +239,8 @@ async function start() {
     burnGlow.position.copy(ship.position);plasmaGlow.position.copy(ship.position);burnGlow.visible=state.show.plasma&&sty.powered;plasmaGlow.visible=state.show.plasma&&sty.plasma;
     const ahead=shipAt(Math.min(MET_END,state.met+2)),p0=ship.position.clone().project(camera),p1=new THREE.Vector3(...drawPoint(ahead)).project(camera);if(state.met<MET_END-2)ship.material.rotation=Math.atan2((p1.y-p0.y)*view.clientHeight,(p1.x-p0.x)*view.clientWidth)+Math.PI/2;
     updateFootprint(s);gtGroup.visible=state.show.gt;gridGroup.visible=state.show.grid;zoneGroup.visible=state.show.zones;zoneLabels.visible=state.show.zones;plasmaGroup.visible=state.show.plasma;cityGroup.visible=state.show.cities;
-    if(fly){const k=clamp((now-fly.start)/1200,0,1),t=k*k*(3-2*k),d=THREE.MathUtils.lerp(fly.from.length(),fly.to.length(),t);camera.position.copy(fly.from.clone().normalize().lerp(fly.to.clone().normalize(),t).normalize().multiplyScalar(d));controls.target.copy(fly.target).multiplyScalar(1-t);if(k===1)fly=null;}
-    else if(state.follow){const d=camera.position.length();camera.position.normalize().lerp(new THREE.Vector3(...s.u),1-Math.exp(-dt*2.5)).normalize().multiplyScalar(d);controls.target.multiplyScalar(Math.exp(-dt*2.5));}
-    controls.panSpeed=clamp((camera.position.length()-1)/Math.max(1e-6,camera.position.distanceTo(controls.target)),.01,1);
-    controls.rotateSpeed=Math.min(1,.12+.3*(camera.position.length()-1));controls.update();
-    if(camera.position.length()<1.05){camera.position.setLength(1.05);camera.lookAt(controls.target);}
+    if(state.follow&&!cam.fly)cam.approach(new THREE.Vector3(...s.u),1-Math.exp(-dt*2.5));
+    cam.update(now,dt);
     mapTiles.update(now,view.clientWidth,view.clientHeight);
     boundaryLayer.update(now,view.clientWidth,view.clientHeight,renderer.getPixelRatio(),state.show.borders);
     for(const g of [zoneLabels,eventGroup])for(const o of g.children)if(o.isCSS2DObject)o.visible=state.show.labels&&visible(o.position);
@@ -261,14 +250,13 @@ async function start() {
     for(const o of cityGroup.children)o.visible=visible(o.position)&&cityInRange(o.userData.tier,cityDistance)&&(!o.isCSS2DObject||state.show.labels);
     renderer.render(scene,camera);labels.render(scene,camera);declutterLabels();if(sky.isOpen()&&now-lastUI>80)sky.render();if(now-lastUI>100){lastUI=now;updateUI(s);}requestAnimationFrame(frame);
   }
-  function resize(){const w=view.clientWidth,h=view.clientHeight,oldScale=cameraScale();camera.aspect=w/h;const d=camera.position.length();if(d>0)camera.position.setLength(clamp(1+(d-1)*cameraScale()/oldScale,1.05,14));renderer.setSize(w,h);labels.setSize(w,h);camera.updateProjectionMatrix();for(const m of materials)m.resolution.set(w,h);}
+  function resize(){const w=view.clientWidth,h=view.clientHeight,oldScale=cameraScale();camera.aspect=w/h;cam.scaleRange(cameraScale()/oldScale);renderer.setSize(w,h);labels.setSize(w,h);camera.updateProjectionMatrix();for(const m of materials)m.resolution.set(w,h);}
   addEventListener('resize',resize);resize();
-  const cam=(qs.get('cam')||'').split(',').map(Number),v=M.views[Math.min(1,M.views.length-1)];
-  const [lon,lat,dist]=cam.length===3&&cam.every(Number.isFinite)?[cam[0],clamp(cam[1],-90,90),clamp(cam[2],1.05,14)]:v.slice(1);
-  const pan=(qs.get('pan')||'').split(',').map(Number);if(pan.length===3&&pan.every(Number.isFinite))controls.target.set(...pan).clampLength(0,.95);
-  camera.position.set(...A.llToVec(lon,lat,qs.has('cam')?dist:clamp(1+(dist-1)*cameraScale(),1.05,14)));camera.lookAt(controls.target);buildTrajectory();
+  const camq=(qs.get('cam')||'').split(',').map(Number),v=M.views[Math.min(1,M.views.length-1)],custom=(camq.length===3||camq.length===5)&&camq.every(Number.isFinite);
+  const [lon,lat,dist]=custom?[camq[0],clamp(camq[1],-90,90),camq[2]]:v.slice(1);
+  cam.set({lon,lat,range:custom?dist-1:(dist-1)*cameraScale(),heading:camq.length===5?camq[3]:0,tilt:camq.length===5?camq[4]:0});buildTrajectory();
   requestAnimationFrame((t)=>{frame(t);$('loading').remove();});
   const want=qs.get('sky'),city=CITIES.find((c)=>c[0].toLowerCase()===want?.toLowerCase()),ll=(want||'').split(',').map(Number);
   if(city)openSky({name:city[0],lon:city[1],lat:city[2]});else if(ll.length===2&&ll.every(Number.isFinite)&&Math.abs(ll[0])<=90&&Math.abs(ll[1])<=180)openSky({lat:ll[0],lon:ll[1],custom:true});
-  window.__sz={state,setMet,setT0,setPlaying,flyTo,camera,controls,pick:groundAt,trackAt,observerMarker:siteMark,shareURL,sky,shipAt,styleAt,footprint:()=>fp,boundaryCoverage:boundaryData.coverage,earth:earthMat,mapLOD:mapTiles,boundaries:boundaryLayer,meta:M,events:data.events,groups:{trajGroup,plasmaGroup,termGroup,cityGroup,gridGroup,zoneGroup,eventGroup},profile:profile.id,mission:entry.id,metEnd:MET_END};
+  window.__sz={state,setMet,setT0,setPlaying,flyTo,camera,view:()=>cam.get(),setView:(view)=>cam.set(view),pick:(x,y)=>cam.groundAt(x,y),trackAt,observerMarker:siteMark,shareURL,sky,shipAt,styleAt,footprint:()=>fp,boundaryCoverage:boundaryData.coverage,earth:earthMat,mapLOD:mapTiles,boundaries:boundaryLayer,meta:M,events:data.events,groups:{trajGroup,plasmaGroup,termGroup,cityGroup,gridGroup,zoneGroup,eventGroup},profile:profile.id,mission:entry.id,metEnd:MET_END};
 }
