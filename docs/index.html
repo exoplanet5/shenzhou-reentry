@@ -18,7 +18,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,[role=button]:focu
 #clock{display:flex;gap:12px;margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}#clock .k{color:var(--dim)}#c-met{font-weight:600}
 .btn{border:1px solid var(--border);background:var(--surface);border-radius:4px;padding:5px 8px;cursor:pointer;white-space:nowrap;min-height:30px}
 .btn:hover{border-color:var(--accent-dim)}.btn.on{border-color:var(--accent);background:var(--input)}.btn.primary{background:var(--accent-dim);min-width:85px}.btn:disabled{opacity:.5;cursor:default}
-#bar .tog{min-width:32px;font-size:16px}.btns{display:flex;flex-wrap:wrap;gap:6px}
+#bar .tog{min-width:32px;font-size:16px}#doclink{text-decoration:none;font-size:11px;padding:4px 8px;min-height:0}.btns{display:flex;flex-wrap:wrap;gap:6px}
 #view{position:fixed;inset:calc(var(--bar) + env(safe-area-inset-top,0px)) 0 0}#view canvas{display:block;outline:none}
 #leftcol{position:fixed;left:var(--gutter);top:calc(var(--bar) + env(safe-area-inset-top,0px) + 16px);bottom:calc(46px + env(safe-area-inset-bottom,0px));width:310px;display:flex;flex-direction:column;gap:10px;z-index:20;pointer-events:none}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;overflow:auto;box-shadow:0 8px 28px rgba(0,0,0,.4);backdrop-filter:blur(5px);pointer-events:auto;min-height:0}
@@ -40,7 +40,7 @@ table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:ta
 #credit{position:fixed;right:var(--right);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:15;font-size:9px;color:var(--dim);text-shadow:0 0 3px var(--halo);pointer-events:none}
 #loading{position:fixed;inset:0;background:var(--space);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding-inline:var(--gutter) var(--right);z-index:50;text-align:center}#loading b{color:var(--accent)}#loadmsg{max-width:50ch;color:var(--dim)}
 @media(max-width:1100px){#subt,.cst{display:none}#info{width:310px}#leftcol{width:290px}#legend{font-size:8.5px}}
-@media(max-width:860px){#bar{gap:9px}.utcd,.cst,#ttlsub{display:none}#leftcol{display:contents}#ctl,#info{position:fixed;inset:calc(var(--bar) + env(safe-area-inset-top,0px) + 12px) var(--right) auto var(--gutter);width:auto;max-height:calc(100dvh - var(--bar) - 64px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}body:not(.ctl-open) #ctl{display:none}#legend{display:none}#credit{left:var(--gutter);right:var(--right);font-size:8px}#ctl .btn{min-height:36px}#clock{gap:8px}}
+@media(max-width:860px){#bar{gap:9px}.utcd,.cst,#ttlsub,#doclink{display:none}#leftcol{display:contents}#ctl,#info{position:fixed;inset:calc(var(--bar) + env(safe-area-inset-top,0px) + 12px) var(--right) auto var(--gutter);width:auto;max-height:calc(100dvh - var(--bar) - 64px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}body:not(.ctl-open) #ctl{display:none}#legend{display:none}#credit{left:var(--gutter);right:var(--right);font-size:8px}#ctl .btn{min-height:36px}#clock{gap:8px}}
 @media(max-width:520px){.utct{display:none}.title{font-size:12px}#clock{font-size:11px}#bar .tog{padding-inline:7px}}
 </style>
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
@@ -48,7 +48,7 @@ table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:ta
 <body>
 <header id="bar">
 <button class="btn tog" data-panel="ctl" aria-label="Toggle controls" aria-controls="ctl">☰</button>
-<div class="title"><span id="ttl">Shenzhou</span><span id="ttlsub"></span></div><div id="subt"></div>
+<div class="title"><span id="ttl">Shenzhou</span><span id="ttlsub"></span></div><div id="subt"></div><a id="doclink" class="btn" href="./model.html" title="How the return is modeled, inputs and results">Model notes</a>
 <div id="clock"><span class="utcd"><span class="k">UTC</span> <span id="c-date">—</span></span><span class="utct"><span id="c-utc">—</span>Z</span><span id="c-met">T+00:00:00</span><span class="cst"><span class="k">CST</span> <span id="c-cst">—</span></span></div>
 <button class="btn tog" data-panel="info" aria-label="Toggle flight information" aria-controls="info">ⓘ</button>
 </header>

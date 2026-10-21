@@ -1,5 +1,6 @@
-// Screenshot helper: node tests/shot.mjs "<query string>" out.png [clip x,y,w,h] — loads the viewer with the given
-// URL parameters in headless Chrome, waits for the tiles, and writes a PNG (optionally a clipped region).
+// Screenshot helper: node tests/shot.mjs "<query string>|page.html" out.png [clip x,y,w,h] — loads the viewer (or another
+// page in docs/) in headless Chrome, waits for the tiles, and writes a PNG of the 1440x1000 viewport (optionally a clipped
+// region). Env: SCALE (default 2), SCROLL=<px> to scroll a document page before the capture.
 import {spawn} from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -22,9 +23,13 @@ try{
   async function wait(expression,timeout=30000){const start=Date.now();while(Date.now()-start<timeout){if(await evaluate(expression))return;await delay(100);}throw new Error('Timed out: '+expression);}
   await call('Runtime.enable');await call('Page.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:2,mobile:false});
-  await call('Page.navigate',{url:base+(query?'?'+query:'')});await wait('!!window.__sz && !document.getElementById("loading")');
-  await delay(1500);await wait('__sz.mapLOD.stats().active===0');await delay(400);
+  // first argument: "key=value&…" for the viewer, or "page.html[?query]" for another page in docs/
+  const isPage=/^[\w.-]+\.html/.test(query);
+  await call('Page.navigate',{url:base+(isPage?query:(query?'?'+query:''))});
+  if(isPage){await wait('document.readyState==="complete"');await delay(1200);}
+  else{await wait('!!window.__sz && !document.getElementById("loading")');await delay(1500);await wait('__sz.mapLOD.stats().active===0');await delay(400);}
+  if(process.env.SCROLL){await evaluate(`window.scrollTo(0,${+process.env.SCROLL})`);await delay(800);}
   const clip=clipArg?Object.fromEntries(['x','y','width','height'].map((k,i)=>[k,+clipArg.split(',')[i]])):undefined;
-  const r=await call('Page.captureScreenshot',{format:'png',...(clip?{clip:{...clip,scale:2}}:{})});
+  const r=await call('Page.captureScreenshot',{format:'png',...(clip?{clip:{...clip,scale:+(process.env.SCALE||2)}}:{})});
   await fs.writeFile(out,Buffer.from(r.data,'base64'));console.log('wrote',out);
 }finally{ws?.close();const exited=new Promise((r)=>chrome.once('exit',r));chrome.kill();await Promise.race([exited,delay(5000)]);await fs.rm(profile,{recursive:true,force:true,maxRetries:10,retryDelay:300}).catch(()=>{});}

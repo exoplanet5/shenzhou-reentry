@@ -9,7 +9,8 @@ cracked window), landed 01:34 UTC at 41.654 N 100.754 E.
 ![Entry profile](out/sz20_profile.png)
 
 **Interactive page:** <https://exoplanet5.github.io/shenzhou-reentry/> (GitHub Pages from `docs/`), or `docs/index.html`
-served locally over HTTP (see below). It is the CZ-6A / Starship IFT-14 viewer
+served locally over HTTP (see below). **Methodology and results write-up:** <https://exoplanet5.github.io/shenzhou-reentry/model.html>
+(`docs/model.html`). It is the CZ-6A / Starship IFT-14 viewer
 adapted to a reentry: free-flight orbit, deorbit burn, capsule entry with the self-luminous plasma trail, parachute
 descent, day/night and nautical-twilight terminators, major cities with pop-up sky charts, a status panel with speed,
 Mach, load and range to the site, and a "reconstruction vs reported" table.
@@ -32,6 +33,7 @@ This is a model built from public reports and published Shenzhou return-sequence
 | `tools/export_mission.py` | builds `docs/data/sz20.json` (tracks, events, DE440s Sun table, element sets) and `docs/data/profiles.json` |
 | `tools/plot_map.py`, `tools/plot_profile.py` | figures |
 | `docs/` | the 3D page (three.js vendored, Blue Marble tiles, Natural Earth boundaries, city catalog, sky chart) |
+| `docs/model.html` | write-up of the methodology, the Shenzhou-20 inputs and results (web-sized figures in `docs/img/`) |
 | `tests/` | schema tests (`node --test`), headless-Chrome smoke test, static server |
 
 ## Audit of the original model (`deorbit_fit.py`, `SZ-20_reentry_trajectory.csv`)
@@ -124,8 +126,8 @@ blackout duration are outputs.
 
 Deorbit delta-v 138.8 m/s, perigee −69 km, entry flight-path angle −1.96° at 100 km (−2.00° at 120 km, inertial;
 −2.05° relative to the air), bank ±47° reversing 4.2 min after entry, blackout 4.9 min (published "4–6 min"),
-landing point matched to the metre by construction. The plasma phase ran from 79.4 E over the Kyrgyz–Xinjiang border
-to 99.0 E near Ejin Banner, 09:14–09:19 Beijing time, with the Sun rising along the track (−9° at blackout start,
+landing point matched to the metre by construction. The plasma phase ran from 79.4 E over the western Tarim basin between Kashgar and Aksu
+to 99.0 E in the Gobi west of Ejin Banner, 09:14–09:19 Beijing time, with the Sun rising along the track (−9° at blackout start,
 −3° at peak heating, +4° at blackout end): a dawn fireball over Xinjiang in nautical-to-civil twilight, visible from
 Aksu, Korla or Hami had the sky been clear.
 

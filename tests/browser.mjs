@@ -44,6 +44,7 @@ try{
   check('two solid solar contours',await evaluate('__sz.groups.termGroup.children.every(x=>!x.material.dashed) && __sz.groups.termGroup.children[0].material.color.getHexString()==="ffd54f" && __sz.groups.termGroup.children[1].material.color.getHexString()==="4fc3f7"'));
   check('credit line',await evaluate('document.getElementById("credit").textContent==="Illustration: Mickey · base map NASA Blue Marble"'));
   check('no launch-viewer leftovers in the text',await evaluate('!(/NOTAM|Sunlit plume|Yaogan|CZ-6A|jellyfish|insertion/i.test(document.body.innerText))'));
+  check('model document is served and linked',await evaluate('fetch("./model.html").then((r)=>r.ok&&r.text()).then((t)=>t.includes("Modeling a Shenzhou reentry"))') && await evaluate('!!document.querySelector("#about a[href=\'./model.html\']") && !!document.getElementById("doclink")'));
   check('compare table filled',await evaluate('document.querySelectorAll("#compare tr").length>=8 && document.getElementById("compare").textContent.includes("reported")'));
   check('timeline has reported and model events',await evaluate('document.querySelectorAll("#events tr.official").length===2 && document.querySelectorAll("#events tbody tr").length>=14'));
   await wait('__sz.mapLOD.stats().active===0');
