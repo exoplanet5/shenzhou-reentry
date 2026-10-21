@@ -1,0 +1,237 @@
+{
+ "mission": "sz20",
+ "x": [
+  135.0029152527118,
+  46.069633839046595,
+  1905.0654108656186
+ ],
+ "t_ign_s_from_ref": -45.0,
+ "parameters": {
+  "t_ign_utc": "2026-01-19T00:45:00Z",
+  "dv_ms": 135.0029152527118,
+  "sigma_deg": 46.069633839046595,
+  "t_rev_met_s": 1905.0654108656186
+ },
+ "events": [
+  {
+   "key": "ignition",
+   "met": 0.0,
+   "utc": "2026-01-19T00:45:00Z",
+   "label": "Deorbit burn ignition"
+  },
+  {
+   "key": "burn_end",
+   "met": 160.0,
+   "utc": "2026-01-19T00:47:40Z",
+   "label": "Deorbit burn cutoff"
+  },
+  {
+   "key": "sm_separation",
+   "met": 1477.5,
+   "utc": "2026-01-19T01:09:37Z",
+   "label": "Service module separation, 145 km"
+  },
+  {
+   "key": "trim",
+   "met": 1574.7,
+   "utc": "2026-01-19T01:11:15Z",
+   "label": "Trim attitude, heat shield forward, 120 km"
+  },
+  {
+   "key": "entry_interface",
+   "met": 1653.6,
+   "utc": "2026-01-19T01:12:34Z",
+   "label": "Entry interface, 100 km"
+  },
+  {
+   "key": "blackout_start",
+   "met": 1734.5,
+   "utc": "2026-01-19T01:13:54Z",
+   "label": "Plasma blackout begins, 80 km"
+  },
+  {
+   "key": "peak_heating",
+   "met": 1847.5,
+   "utc": "2026-01-19T01:15:47Z",
+   "label": "Peak heating"
+  },
+  {
+   "key": "max_g",
+   "met": 2053.5,
+   "utc": "2026-01-19T01:19:13Z",
+   "label": "Maximum deceleration, 3.2 g"
+  },
+  {
+   "key": "blackout_end",
+   "met": 2040.0,
+   "utc": "2026-01-19T01:19:00Z",
+   "label": "Blackout ends, 40 km"
+  },
+  {
+   "key": "mach1",
+   "met": 2160.0,
+   "utc": "2026-01-19T01:21:00Z",
+   "label": "Subsonic, Mach 1"
+  },
+  {
+   "key": "chute",
+   "met": 2190.1,
+   "utc": "2026-01-19T01:21:30Z",
+   "label": "Parachute cover off, pilot and drogue chutes, 10 km"
+  },
+  {
+   "key": "main",
+   "met": 2211.1,
+   "utc": "2026-01-19T01:21:51Z",
+   "label": "Main parachute, 8 km"
+  },
+  {
+   "key": "shield",
+   "met": 2381.1,
+   "utc": "2026-01-19T01:24:41Z",
+   "label": "Heat shield jettison, 6 km"
+  },
+  {
+   "key": "landing",
+   "met": 2970.0,
+   "utc": "2026-01-19T01:34:30Z",
+   "label": "Touchdown"
+  }
+ ],
+ "diag": {
+  "atmosphere": "NRLMSIS 2.1 column at 41.654 N 100.754 E, 2026-01-19T01:34:30Z, F10.7 150 sfu, Ap 10 (fixed)",
+  "t_ign_utc": "2026-01-19T00:45:00Z",
+  "dv_ms": 135.0,
+  "burn_s": 160.0,
+  "thrust_implied_kN": 4.84,
+  "mass_at_burn_kg": 5740.0,
+  "burn_point": [
+   -27.441,
+   -15.393,
+   385.2
+  ],
+  "deorbit_perigee_km": -57.7,
+  "deorbit_a_km": 6539.43,
+  "deorbit_e": 0.033482,
+  "v_after_burn_kms": 7.5514,
+  "ei_point": [
+   37.225,
+   72.061
+  ],
+  "ei_v_inertial_kms": 7.8871,
+  "ei_v_relative_kms": 7.5347,
+  "ei_fpa_inertial_deg": -1.888,
+  "ei_fpa_relative_deg": -1.976,
+  "ei_range_to_site_km": 2500.5,
+  "gamma_ref_km": 120.0,
+  "gamma_at_ref_deg": -1.935,
+  "gamma_target_deg": -1.6,
+  "bank_deg": 46.07,
+  "bank_reversal_met": 1905.1,
+  "max_g": 3.25,
+  "max_g_alt_km": 37.7,
+  "max_g_mach": 7.7,
+  "peak_heating_Wcm2": 66.7,
+  "peak_heating_alt_km": 57.5,
+  "peak_heating_mach": 22.0,
+  "blackout_s": 305.5,
+  "v_at_chute_ms": 190.7,
+  "v_at_main_ms": 72.3,
+  "v_touchdown_ms": 7.42,
+  "chute_descent_s": 779.9,
+  "entry_to_chute_s": 536.6,
+  "burn_to_ei_s": 1653.6,
+  "landing": [
+   41.65361,
+   100.75361
+  ],
+  "landing_utc": "2026-01-19T01:34:30Z",
+  "target": [
+   41.65361,
+   100.75361
+  ],
+  "target_utc": "2026-01-19T01:34:30Z",
+  "miss_north_km": -0.0,
+  "miss_east_km": 0.0,
+  "landing_time_error_s": -0.0,
+  "ignition_after_om_separation_s": 60.0,
+  "om_separation_reported_utc": "2026-01-19T00:44:00Z"
+ },
+ "inputs": {
+  "id": "sz20",
+  "name": "Shenzhou-20",
+  "date": "2026-01-19",
+  "description": "Uncrewed return of the Shenzhou-20 spacecraft (cracked window) from the China Space Station to the Dongfeng landing site, 19 January 2026.",
+  "tle": {
+   "name": "SZ-20",
+   "line1": "1 63632U 25082A   26019.03903266  .00021178  00000-0  25083-3 0  9994",
+   "line2": "2 63632  41.4662 149.9978 0010928 313.3598  46.6329 15.60669378255300",
+   "source": "Space-Track gp_history for NORAD 63632 (SZ-20); epoch 2026-01-19 00:56:12 UTC, the last element set consistent with the pre-burn orbit (mean motion follows the decay trend of the previous sets; the 17:50 UTC set is a post-landing propagation artefact)."
+  },
+  "reported": {
+   "undock_utc": "2026-01-18T16:23:00Z",
+   "om_separation_utc": "2026-01-19T00:44:00Z",
+   "landing_utc": "2026-01-19T01:34:30Z",
+   "landing_lat": 41.65361,
+   "landing_lon": 100.75361,
+   "landing_alt_km": 1.0,
+   "landing_name": "Dongfeng landing site",
+   "sources": [
+    "CMSA / Xinhua 2026-01-19: undocked 00:23 Beijing (18 Jan 16:23 UTC), return capsule landed 09:34 Beijing (01:34 UTC) at the Dongfeng landing site.",
+    "CCTV 2026-01-19 video report: orbital module separated 08:44 Beijing (00:44 UTC), then deorbit engine burn, service-module separation, landing 09:34.",
+    "Landing coordinates 41 39 13 N 100 45 13 E from the Wikipedia Shenzhou 20 article (unverified against CMSA).",
+    "Terrain height about 1.0 km (Jiuquan / Ejin Banner Gobi, 940-1100 m); assumption."
+   ],
+   "landing_time_note": "Reported to the minute (09:34 Beijing); mid-minute used, tolerance +/-30 s.",
+   "om_separation_note": "Reported to the minute (08:44 Beijing); the burn follows a ~60 s attitude slew."
+  },
+  "design": {
+   "gamma_ref_deg": -1.6,
+   "gamma_ref_km": 120.0,
+   "gamma_note": "Entry flight-path angle target (inertial). CASC explainers give 1.5-1.7 deg without stating the reference height; 120 km (trim-attitude height) is used, which corresponds to about 1.9 deg at 100 km.",
+   "burn_duration_s": 160.0,
+   "burn_note": "Published 150-180 s; constant thrust acceleration, retrograde along the inertial velocity (no pitch).",
+   "h_sm_separation_km": 145.0,
+   "h_trim_km": 120.0,
+   "h_ei_km": 100.0,
+   "h_blackout_km": [
+    80.0,
+    40.0
+   ],
+   "h_chute_km": 10.0,
+   "h_main_km": 8.0,
+   "h_shield_km": 6.0,
+   "sequence_sources": [
+    "CCTV / Xinhua return-sequence explainers (Shenzhou-14, -16, -20): orbital-module separation, two 90-degree attitude slews (~120 s), retro burn 150-180 s, service-module separation at ~145 km, trim attitude at ~120 km, entry at ~100 km at ~7 km/s, blackout 80-40 km, speed ~200 m/s at 10 km, pilot/drogue/main chutes from 10 km, main 1200 m2 giving 7-8 m/s, heat shield jettison at ~6 km, retro-rockets at 1 m, touchdown 1-2 m/s."
+   ]
+  },
+  "vehicle": {
+   "rm_mass_kg": 3240.0,
+   "shield_mass_kg": 300.0,
+   "sm_mass_kg": 2500.0,
+   "diameter_m": 2.52,
+   "ld_hypersonic": 0.3,
+   "cd_hypersonic": 1.3,
+   "nose_radius_m": 2.5,
+   "drogue_cds_m2": 19.2,
+   "main_cds_m2": 920.0,
+   "sources": [
+    "Return module 3,240 kg, 2.52 m diameter, hypersonic L/D 0.30 (astronautix.com, braeunig.us Shenzhou specifications).",
+    "Service module 3,000 kg at launch with 1,000 kg propellant, main engine 10 kN (4 x 2.5 kN), Isp 290 s; 2,500 kg assumed at deorbit after 270 days.",
+    "Parachutes: pilot 4.25 + 0.7 m2, drogue 24 m2, main 1,200 m2 ring-sail, backup 760 m2 (China Space Report). Drogue Cd 0.8; main Cd*S 920 m2 chosen so the descent rate is 7.5 m/s at the 1 km site elevation with the 2,940 kg post-shield mass.",
+    "Hypersonic Cd 1.30 for a Soyuz-class blunt capsule at its trim angle (modified Newtonian); ballistic coefficient ~500 kg/m2."
+   ]
+  },
+  "solver": {
+   "t_ign_utc": "2026-01-19T00:45:45Z",
+   "t_ign_note": "Fixed per run: reported orbital-module separation 08:44 Beijing (minute precision) plus the ~60-90 s second attitude slew gives 00:45:00-00:46:30 UTC; the README scans this range.",
+   "dv_guess_ms": 140.0,
+   "sigma_guess_deg": 45.0,
+   "t_rev_after_ei_guess_s": 200.0,
+   "weights": {
+    "position_km": 2.0,
+    "time_s": 10.0
+   }
+  }
+ }
+}

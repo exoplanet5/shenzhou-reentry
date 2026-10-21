@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shenzhou Reentry</title>
+<meta name="description" content="Interactive 3D reconstruction of a Shenzhou return from the China Space Station: deorbit burn, capsule entry, plasma blackout, parachutes and landing at Dongfeng, with day/night terminators and observer sky charts. First mission: the uncrewed Shenzhou-20 return of 19 January 2026.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='%23123a5c'/%3E%3Cpath d='M10 40 Q32 8 56 26' stroke='%234fc3f7' stroke-width='4' fill='none'/%3E%3Ccircle cx='50' cy='22' r='5' fill='%23ffd54f'/%3E%3C/svg%3E">
+<style>
+:root{color-scheme:dark;--bg:#101418;--space:#05070a;--panel:rgba(23,28,34,.94);--surface:#1e242c;--input:#0c1014;--fg:#e8eaed;--dim:#9aa4ae;--border:#303a45;--accent:#4fc3f7;--accent-dim:#2a7ea8;--sun:#ffd54f;--halo:#05080c;--mono:Menlo,"SF Mono",Consolas,monospace;--bar:50px;--gutter:max(16px,env(safe-area-inset-left,0px));--right:max(16px,env(safe-area-inset-right,0px))}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--space);color:var(--fg);font:12px/1.5 var(--mono);-webkit-text-size-adjust:100%}
+button,select,input{font:inherit;color:inherit}button,select,input[type=range]{touch-action:manipulation}
+button:focus-visible,select:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#bar{position:fixed;inset:0 0 auto;min-height:calc(var(--bar) + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);padding-left:var(--gutter);padding-right:var(--right);display:flex;gap:14px;align-items:center;background:var(--bg);border-bottom:1px solid var(--border);z-index:30}
+.title{font-weight:700;white-space:nowrap;font-size:13px}.title #ttl{color:var(--accent)}.title #ttlsub{font-weight:400;font-size:11px;margin-left:6px}
+#subt{color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#clock{display:flex;gap:12px;margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}#clock .k{color:var(--dim)}#c-met{font-weight:600}
+.btn{border:1px solid var(--border);background:var(--surface);border-radius:4px;padding:5px 8px;cursor:pointer;white-space:nowrap;min-height:30px}
+.btn:hover{border-color:var(--accent-dim)}.btn.on{border-color:var(--accent);background:var(--input)}.btn.primary{background:var(--accent-dim);min-width:85px}.btn:disabled{opacity:.5;cursor:default}
+#bar .tog{min-width:32px;font-size:16px}.btns{display:flex;flex-wrap:wrap;gap:6px}
+#view{position:fixed;inset:calc(var(--bar) + env(safe-area-inset-top,0px)) 0 0}#view canvas{display:block;outline:none}
+#leftcol{position:fixed;left:var(--gutter);top:calc(var(--bar) + env(safe-area-inset-top,0px) + 16px);bottom:calc(46px + env(safe-area-inset-bottom,0px));width:310px;display:flex;flex-direction:column;gap:10px;z-index:20;pointer-events:none}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;overflow:auto;box-shadow:0 8px 28px rgba(0,0,0,.4);backdrop-filter:blur(5px);pointer-events:auto;min-height:0}
+#ctl{flex:0 1 auto}#info{position:fixed;right:var(--right);top:calc(var(--bar) + env(safe-area-inset-top,0px) + 16px);bottom:calc(46px + env(safe-area-inset-bottom,0px));width:340px;z-index:20}
+body:not(.ctl-open) #leftcol,body:not(.info-open) #info{display:none}
+h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--dim);margin:16px 0 8px;padding-top:12px;border-top:1px solid var(--border)}h2:first-child{margin-top:0;border-top:0;padding-top:0}
+.row{display:flex;align-items:center;gap:8px;margin-block:8px}.row>label.k{flex:0 0 48px;color:var(--dim)}.row .v{margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
+select{flex:1;min-width:0;background:var(--input);border:1px solid var(--border);border-radius:4px;padding:5px}input[type=range]{flex:1;min-width:0;accent-color:var(--accent);height:24px}
+#profile-summary{margin-top:9px;font-variant-numeric:tabular-nums}.note{font-size:10.5px;line-height:1.6;color:var(--dim);margin:8px 0 0;overflow-wrap:anywhere}#about a{color:var(--fg);text-underline-offset:3px}
+.layers{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:9px}.chk{display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;min-height:25px}.chk input{accent-color:var(--accent);margin:0}
+#model-badge{font-size:10px;text-transform:uppercase;letter-spacing:.08em;border:1px solid var(--border);padding:3px 6px;border-radius:3px;display:inline-block;margin-bottom:12px;color:var(--dim)}
+table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}td,th{text-align:left;padding:4px 3px;vertical-align:top}th{color:var(--dim);font-weight:400;border-bottom:1px solid var(--border)}#status td:first-child{color:var(--dim);width:105px}#status td+td{overflow-wrap:anywhere}
+#events{font-size:10px}#events td{padding-block:6px}#events tr.past{opacity:.55}#events tr.next{background:var(--surface)}#events tr.official td:last-child{color:var(--sun)}#compare td:first-child{color:var(--dim);width:118px}.time-jump{background:none;border:0;padding:0;color:var(--fg);cursor:pointer;font:inherit;white-space:nowrap;text-decoration:underline;text-decoration-color:var(--dim);text-underline-offset:3px}
+#tle{max-width:100%;font-size:10px;line-height:1.5;white-space:pre;overflow:auto;background:var(--input);border:1px solid var(--border);padding:8px;border-radius:4px}
+#legend{flex:none;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:9.5px;line-height:1.6;pointer-events:auto;overflow:hidden}#legend>div{display:flex;flex-direction:column;gap:1px}#legend span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#legend i{display:inline-block;width:16px;border-top:2px solid var(--fg);vertical-align:3px;margin-right:6px}#legend i.d{border-top-style:dashed}#legend b{display:inline-block;width:16px;margin-right:6px;text-align:center;color:var(--sun);font-weight:400}
+#notice{position:fixed;left:50%;transform:translateX(-50%);bottom:45px;max-width:min(560px,calc(100vw - 32px));z-index:40;background:var(--panel);padding:8px 12px;border-radius:5px;pointer-events:none}#notice:empty{display:none}
+#inspect{position:fixed;z-index:25;pointer-events:none;white-space:pre-line;background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:7px 9px;font-size:11px}
+.lbl{font:11px/1.4 var(--mono);color:var(--fg);white-space:pre;pointer-events:none;padding-left:10px;text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 2px var(--halo),0 0 1px var(--halo)}.lbl.small,.lbl.zone{font-size:10px}.lbl.below{padding-top:48px;padding-left:0}.lbl.city{font-size:10px;padding-left:6px;pointer-events:auto;cursor:pointer}.lbl.vehicle{padding-bottom:36px}
+#credit{position:fixed;right:var(--right);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:15;font-size:9px;color:var(--dim);text-shadow:0 0 3px var(--halo);pointer-events:none}
+#loading{position:fixed;inset:0;background:var(--space);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding-inline:var(--gutter) var(--right);z-index:50;text-align:center}#loading b{color:var(--accent)}#loadmsg{max-width:50ch;color:var(--dim)}
+@media(max-width:1100px){#subt,.cst{display:none}#info{width:310px}#leftcol{width:290px}#legend{font-size:8.5px}}
+@media(max-width:860px){#bar{gap:9px}.utcd,.cst,#ttlsub{display:none}#leftcol{display:contents}#ctl,#info{position:fixed;inset:calc(var(--bar) + env(safe-area-inset-top,0px) + 12px) var(--right) auto var(--gutter);width:auto;max-height:calc(100dvh - var(--bar) - 64px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}body:not(.ctl-open) #ctl{display:none}#legend{display:none}#credit{left:var(--gutter);right:var(--right);font-size:8px}#ctl .btn{min-height:36px}#clock{gap:8px}}
+@media(max-width:520px){.utct{display:none}.title{font-size:12px}#clock{font-size:11px}#bar .tog{padding-inline:7px}}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
+</head>
+<body>
+<header id="bar">
+<button class="btn tog" data-panel="ctl" aria-label="Toggle controls" aria-controls="ctl">☰</button>
+<div class="title"><span id="ttl">Shenzhou</span><span id="ttlsub"></span></div><div id="subt"></div>
+<div id="clock"><span class="utcd"><span class="k">UTC</span> <span id="c-date">—</span></span><span class="utct"><span id="c-utc">—</span>Z</span><span id="c-met">T+00:00:00</span><span class="cst"><span class="k">CST</span> <span id="c-cst">—</span></span></div>
+<button class="btn tog" data-panel="info" aria-label="Toggle flight information" aria-controls="info">ⓘ</button>
+</header>
+<main id="view" aria-label="Interactive Earth and reentry trajectory. Drag to rotate, right-drag or two-finger drag to pan, scroll or pinch to zoom. Click the globe for its sky chart; hover or click the track to inspect time and altitude."></main>
+<div id="leftcol">
+<aside id="ctl" class="panel" aria-label="Return controls">
+<h2>Return mission</h2>
+<div class="row"><label class="k" for="profilesel">Vehicle</label><select id="profilesel"></select></div>
+<div class="row"><label class="k" for="launchsel">Mission</label><select id="launchsel"></select></div>
+<div id="profile-summary"></div>
+<h2>T0 · <span id="t0label">deorbit burn</span> · UTC</h2>
+<div class="row"><span class="k">Date</span><span id="datev"></span></div>
+<div class="row"><label class="k" for="t0">T0</label><input id="t0" type="range" step="1"><span class="v" id="t0v"></span></div>
+<div class="btns" id="t0presets"></div>
+<p class="note">Shifting T0 moves only the Sun: the Earth-fixed track is the reconstructed one. Use it to see how the same descent would be lit at another hour.</p>
+<h2>Return playback</h2>
+<div class="row"><label class="k" for="met">T±</label><span class="v" id="metv"></span></div><div class="row"><input id="met" aria-label="Time from deorbit burn ignition" type="range" step="0.1"></div>
+<div class="row"><button class="btn primary" id="play">▶ Play</button><select id="speed" aria-label="Playback speed"><option value="1">1× real time</option><option value="5">5×</option><option value="10">10×</option><option value="60">60×</option><option value="300">300×</option></select></div>
+<div class="btns"><button class="btn" id="back">−30 s</button><button class="btn" id="fwd">+30 s</button><button class="btn" id="live">Live clock</button><button class="btn" id="link">Copy link</button></div>
+<h2>Camera & observer</h2><div class="btns" id="views"></div><div class="btns" style="margin-top:8px"><button class="btn" id="skybtn">✶ Observer sky chart</button></div>
+<div class="layers">
+<label class="chk"><input id="o-follow" type="checkbox">Follow capsule</label><label class="chk"><input id="o-plasma" type="checkbox">Plasma trail</label>
+<label class="chk"><input id="o-term" type="checkbox">Terminators</label>
+<label class="chk"><input id="o-zones" type="checkbox">Zones</label><label class="chk"><input id="o-labels" type="checkbox">Labels</label>
+<label class="chk"><input id="o-gt" type="checkbox">Ground track</label><label class="chk"><input id="o-fp" type="checkbox" checked>15° circle</label>
+<label class="chk"><input id="o-grid" type="checkbox">Graticule</label><label class="chk"><input id="o-cities" type="checkbox">Cities</label>
+<label class="chk"><input id="o-lights" type="checkbox">City lights</label>
+<label class="chk" title="Country borders worldwide; province and region boundaries only in China · China-claims map view"><input id="o-borders" type="checkbox" checked>Borders & regions</label>
+</div><p class="note">Drag to orbit · right-drag or two fingers to pan · scroll or pinch to zoom. Click anywhere on the globe for its sky chart; click the trajectory to seek. Camera presets recenter.</p>
+</aside>
+<div id="legend" aria-label="Trajectory and solar-line legend"></div>
+</div>
+<aside id="info" class="panel" aria-label="Flight information">
+<div id="model-badge"></div><h2>Capsule status</h2><table id="status"><tbody></tbody></table>
+<h2>Reconstruction vs reported</h2><table id="compare"><tbody></tbody></table>
+<p class="note">Reported times are to the minute (CMSA / CCTV). The model is solved to the reported landing point and minute for a burn ignition set by the reported orbital-module separation; the entry angle, loads and heating follow from it.</p>
+<h2>Return timeline</h2><table id="events"><thead><tr><th>MET · seek</th><th>UTC</th><th>Event</th></tr></thead><tbody></tbody></table>
+<h2>Element sets</h2><pre id="tle"></pre><button class="btn" id="copytle">Copy TLE</button>
+<p class="note">The Space-Track set is the observed pre-burn orbit. The deorbit-ellipse set is the model state at burn cutoff (perigee below the surface; placeholder catalog number). A changed T0 shifts epoch and RAAN; the viewer plays numerical samples, not SGP4.</p>
+<h2>Model & sources</h2><div class="note" id="about"></div>
+</aside>
+<div id="inspect" hidden></div><div id="notice" role="status" aria-live="polite"></div>
+<footer id="credit">Illustration: Mickey · base map NASA Blue Marble</footer>
+<div id="loading"><div>Loading <b>Shenzhou</b> reentry…</div><div id="loadmsg"></div></div>
+<script type="module">
+import('./js/app.js').catch((error)=>{
+  console.error(error);
+  document.getElementById('loadmsg').textContent=`A module could not load: ${error.message}. Reload the page and check that the local HTTP server is running.`;
+});
+</script>
+<script>if(location.protocol==='file:')document.getElementById('loadmsg').textContent='Serve the docs folder over HTTP. Run python3 -m http.server 8000 --directory docs from the repository, then open http://localhost:8000.';</script>
+</body>
+</html>

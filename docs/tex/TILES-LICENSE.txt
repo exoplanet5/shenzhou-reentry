@@ -1,0 +1,20 @@
+Day-map tiles: NASA Blue Marble Next Generation, topography and bathymetry,
+September 2004. Shared source filename:
+world.topo.bathy.200409.3x21600x10800.jpg
+Source collection: https://visibleearth.nasa.gov/collection/1484/blue-marble
+NASA image-use guidance: https://www.nasa.gov/nasa-brand-center/images-and-media/
+
+Tiles are JPEG crops/resamplings of the locally supplied 21600 x 10800 source,
+not live imagery. No terrain or additional detail is synthesized. The native
+source image is not copied into this repository. tex/tiles/manifest.json holds
+its SHA-256 and the SHA-256 of each exported tile. The finest level preserves
+the native global pixel dimensions; coarser levels use Lanczos resampling.
+Levels 1-3 (5400, 10800 and 21600 pixels wide) are exported; the 4096 x 2048
+base globe covers coarser views.
+Each tile has a one-pixel longitude-wrapped, pole-clamped gutter for filtering.
+
+Rebuild: python -I tools/export_map_tiles.py
+Verify:  python -I tools/export_map_tiles.py --check
+Requires Pillow. The exporter defaults to the shared image under ~/sda/basemaps/.
+Browser rendering and deployment require no Python, external imagery service
+or API key. NASA imagery attribution is retained in the viewer and README.

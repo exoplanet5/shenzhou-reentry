@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "default_profile": "shenzhou",
+  "profiles": [
+    {
+      "id": "shenzhou",
+      "label": "Shenzhou · return from the China Space Station",
+      "family": "capsule",
+      "default_mission": "sz20",
+      "missions": [
+        {
+          "id": "sz20",
+          "label": "Shenzhou-20 · 2026-01-19 (uncrewed)",
+          "file": "data/sz20.json"
+        }
+      ]
+    }
+  ]
+}
