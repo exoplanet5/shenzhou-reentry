@@ -54,13 +54,13 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 30px;font:11px var(--mono);c
 </style>
 </head>
 <body>
-<header class="top"><b>Shenzhou</b><span class="hide">reentry · methodology and Shenzhou-20 results</span><span class="sp"></span><a href="./">3D viewer</a><a href="https://github.com/exoplanet5/shenzhou-reentry" target="_blank" rel="noopener noreferrer">Repository</a></header>
+<header class="top"><b>Shenzhou</b><span class="hide">reentry · methodology, Shenzhou-20 results, Shenzhou-23 forecast</span><span class="sp"></span><a href="./">3D viewer</a><a href="https://github.com/exoplanet5/shenzhou-reentry" target="_blank" rel="noopener noreferrer">Repository</a></header>
 <main>
 <h1>Modeling a Shenzhou reentry</h1>
-<p class="sub">How the return of a Shenzhou spacecraft from the China Space Station is reconstructed from public reports — the dynamics, the vehicle and atmosphere models, the solver — and what it gives for the uncrewed Shenzhou-20 return of 19 January 2026.</p>
+<p class="sub">How the return of a Shenzhou spacecraft from the China Space Station is reconstructed from public reports — the dynamics, the vehicle and atmosphere models, the solver — what it gives for the uncrewed Shenzhou-20 return of 19 January 2026, and a forecast of the Shenzhou-23 return of late November 2026.</p>
 
 <div class="toc">
-<a href="#summary">1 · Summary</a><br><a href="#sequence">2 · The published return sequence</a><br><a href="#method">3 · Methodology</a><br><a href="#inputs">4 · Shenzhou-20 inputs</a><br><a href="#results">5 · Shenzhou-20 results</a><br><a href="#audit">6 · Audit of the earlier Keplerian fit</a><br><a href="#limits">7 · Limitations</a><br><a href="#extend">8 · Another mission</a><br><a href="#files">9 · Files and reproduction</a>
+<a href="#summary">1 · Summary</a><br><a href="#sequence">2 · The published return sequence</a><br><a href="#method">3 · Methodology</a><br><a href="#inputs">4 · Shenzhou-20 inputs</a><br><a href="#results">5 · Shenzhou-20 results</a><br><a href="#audit">6 · Audit of the earlier Keplerian fit</a><br><a href="#limits">7 · Limitations</a><br><a href="#forecast">8 · Forecast: Shenzhou-23, 29 November 2026</a><br><a href="#extend">9 · Another mission</a><br><a href="#files">10 · Files and reproduction</a>
 </div>
 
 <h2 id="summary">1 · Summary</h2>
@@ -276,33 +276,74 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 30px;font:11px var(--mono);c
 <li>Fixed solar indices in MSIS and no day-to-day weather in the atmosphere.</li>
 </ul>
 
-<h2 id="extend">8 · Another mission</h2>
+<h2 id="forecast">8 · Forecast: Shenzhou-23, 29 November 2026</h2>
+<p>Made on 11 November 2026, before Shenzhou-24 has flown. Shenzhou-23 has been docked since 24 May; after the Shenzhou-24 crew arrives, expected around 25 November, it brings two of its crew and the visiting astronaut home. The date is not announced. This section asks which pass the station's orbit lines up over the landing site and what a return on it would look like.</p>
+<h3>The orbit</h3>
+<p>CelesTrak publishes supplemental elements for the station fitted to the ephemeris that CMSA issues, in 6-hour segments, and that ephemeris includes planned manoeuvres. The set fetched on 11 November has 28 segments, to 18 November 00:00 UTC, and shows a reboost in the segment of 13 November 06:00–12:00: the mean motion falls from 15.6173 to 15.6058 rev/day, a rise of about 1.9 km in mean height. Each segment is valid forward from its epoch: neighbours agree to under 1 km at the later segment's epoch.</p>
+<p>The 18 segments after the reboost are sampled every 10 minutes and one SGP4 element set, mean elements and B*, is fitted to them. It reproduces the 4.5 days to 0.6 km RMS along track (1.5 km at worst) with B* = 2.0 × 10⁻⁴, and is then propagated 12 days with that drag.</p>
+<pre>1 69180U 26113A   26321.75000000  .00000000  00000-0  19968-3 0  9999
+2 69180  41.4679 108.7708 0007680 292.3004 344.7832 15.60744506    08</pre>
+<h3>Passes over Dongfeng</h3>
+<p>The site's geodetic latitude equals the highest latitude the ground track reaches, so the track crosses it heading east. The reboost leaves the pass of 29 November 2.4 km from the Shenzhou-20 landing point, the same miss as the Shenzhou-20 pass itself (2.3 km): that is the pass the orbit is phased for.</p>
+<table>
+<tr><th>pass, closest to the site (UTC)</th><th class="n">track south of the site</th><th class="n">heading</th><th class="n">drag ±30 %</th></tr>
+<tr class="hl"><td>29 Nov 20:56:46</td><td class="n">2.4 km</td><td class="n">89°</td><td class="n">∓45 s</td></tr>
+<tr><td>29 Nov 19:20:00</td><td class="n">319.7 km</td><td class="n">73°</td><td class="n">∓44 s</td></tr>
+<tr><td>29 Nov 22:33:32</td><td class="n">262.1 km</td><td class="n">106°</td><td class="n">∓45 s</td></tr>
+</table>
+<p>The neighbouring passes of the same day are out of reach (<code>out/sz23_orbit_forecast.json</code>).</p>
+<h3>The descent</h3>
+<p>The descent is the Shenzhou-20 reconstruction moved onto this pass: the same burn (138.8 m/s in 160 s), bank magnitude (47°), vehicle and sequence heights, with an NRLMSIS 2.1 column for the date. The ignition time and the bank reversal are solved so that the capsule reaches the aim point; the landing time is an output. The ignition is then put on a whole second, which moves the bank by up to 0.2°.</p>
+<table>
+<tr><th>UTC date</th><th>ignition</th><th>entry 100 km</th><th>plasma 80–40 km</th><th>touchdown</th><th>Beijing time</th><th class="n">Sun at site</th></tr>
+<tr><td>29 Nov</td><td>20:24:04</td><td>20:50:40</td><td>20:51:56 – 20:56:46</td><td>21:12:13</td><td>30 Nov 05:12</td><td class="n">−38°</td></tr>
+</table>
+<p>It is a night landing. The entry angle is −2.00° at 100 km, the peak load 3.3 g, the blackout 4.8 min. The capsule is in the Earth's shadow throughout, so only the plasma trail's own light shows: from 79–80° E over the western Tarim basin to 99° E west of the site, in a fully dark sky.</p>
+<figure><img src="img/sz23-1129_visibility.jpg" alt="Map of western China with the Shenzhou-23 entry track of 29 November 2026 from the Pamir to Dongfeng, the plasma trail across the Tarim basin and the zone where it stands 10 degrees or more above the horizon" ><figcaption>29 November: the plasma trail and the ground that has it 10° or more above the horizon (1.27 million km², all in darkness). Inset: deorbit burn over the South Atlantic. Full resolution in <code>out/sz23-1129_visibility.png</code>.</figcaption></figure>
+<h3>How far to trust it</h3>
+<ul>
+<li><b>The day and the pass are CMSA's choice.</b> The orbit says which pass lines up; it does not say that the landing is on it.</li>
+<li><b>Drag.</b> An error of ±30 % in the drag over the propagation moves the pass by 45 s. Solar activity sets it. The page's T0 presets are these bounds.</li>
+<li><b>Further manoeuvres.</b> Another reboost or a collision-avoidance burn before the return would move the pass by minutes. The published ephemeris ends on 18 November; fetch it again nearer the date and rerun.</li>
+<li><b>The burn.</b> The delta-v and bank are Shenzhou-20's. A different entry angle moves the burn-to-landing time: in the Shenzhou-20 sensitivity runs, 45 s of ignition time went with 4 m/s and 0.07°.</li>
+<li><b>Free flight.</b> After undocking the spacecraft leaves the station's orbit by a few km; the forecast uses the station's.</li>
+<li><b>Aim point.</b> The Shenzhou-20 landing point stands in for the aim point of the site.</li>
+</ul>
+
+<h2 id="extend">9 · Another mission</h2>
 <ol>
 <li>Copy <code>model/missions/sz20.json</code> and fill in the spacecraft's element set (<code>st.py gp &lt;norad&gt; --from … --lines</code>), the reported separation and landing minutes, the landing point and terrain height, and any changed vehicle data.</li>
 <li>Run <code>model/shenzhou_reentry.py --mission … --solve</code>, then with <code>--tign</code> variants for the sensitivity table.</li>
-<li>Run <code>tools/export_mission.py --id …</code> to add the mission to the viewer manifest, then the two plot scripts.</li>
-<li>Run <code>npm test</code> and the browser test; commit; GitHub Pages redeploys from <code>docs/</code>.</li>
+<li>Run <code>tools/build_page.py</code>, which exports every solved mission and registers it on the page, then the plot scripts.</li>
+<li>Run <code>npm test</code>, the browser test and the launch-page skill's <code>check_page.py</code>.</li>
 </ol>
+<p>For a forecast, <code>tools/css_orbit.py --dates …</code> writes the mission files from the station's supplemental elements instead of step 1, and the solver then runs in its prediction mode.</p>
 <p>A crewed evening return (Shenzhou-22 landed on 29 May 2026 at 12:11 UTC) would put the plasma phase in a dark sky over western China; the viewer's T0 slider already shows what that looks like for the Shenzhou-20 track.</p>
 
-<h2 id="files">9 · Files and reproduction</h2>
+<h2 id="files">10 · Files and reproduction</h2>
 <pre>model/shenzhou_reentry.py        3-DOF model, solver, CSV/JSON export
 model/atmo.py, model/us76.py     NRLMSIS 2.1 column (cached), US76
 model/missions/sz20.json         all Shenzhou-20 inputs and sources
 out/sz20_solution.json           solved parameters, events, diagnostics
 out/sz20_trajectory.csv          1 s trajectory: UTC, lon, lat, WGS-84 height, speeds, Mach, γ, g, q, heating, phase
 out/sz20_*_{0045,0046,us76}.*    sensitivity runs
-tools/export_mission.py          viewer JSON (tracks, events, DE440s Sun table, element sets)
-tools/plot_map.py, plot_profile.py
+model/elements/                  CelesTrak supplemental elements of the station, as fetched
+tools/css_orbit.py               orbit forecast, passes over the site, forecast mission files
+model/missions/sz23-1129.json    the Shenzhou-23 forecast
+tools/export_mission.py          mission JSON for the page (tracks, events, DE440s Sun and Moon tables, element sets)
+tools/build_page.py              builds docs/ from the launch-page template and the missions
+tools/plot_visibility.py, plot_map.py, plot_profile.py
 docs/                            the 3D page (this document is docs/model.html)
-tests/                           schema tests, headless-Chrome test, static server, screenshot helper</pre>
+tests/                           mission tests, headless-Chrome test, screenshot helper</pre>
 <pre>P=~/.venvs/astro313/bin/python
 $P model/shenzhou_reentry.py --solve                 # about 3 min
 $P model/shenzhou_reentry.py --solve --tign 00:46:30 --tag _0046
 $P model/shenzhou_reentry.py --solve --atmo us76 --tag _us76
-$P tools/export_mission.py && $P tools/plot_map.py && $P tools/plot_profile.py
-npm test && node tests/serve.mjs 8767 &amp; npm run test:browser</pre>
-<p>Python 3.13 with numpy, scipy, sgp4, skyfield, pymsis, matplotlib and pillow; the shared JPL DE440s kernel for the Sun table; Node 22+ and Chrome for the tests. Starship IFT-14 supplied the 3-DOF entry framework, the US76 module and the map style; CZ-6A the viewer, exporter contract and map layers.</p>
+$P tools/css_orbit.py --dates 2026-11-29             # orbit forecast and the forecast mission file
+$P model/shenzhou_reentry.py --mission model/missions/sz23-1129.json --solve   # about 2 min
+$P tools/build_page.py && $P tools/plot_visibility.py --id sz23-1129 && $P tools/plot_profile.py --id sz23-1129
+npm test && python3 tools/serve.py &amp; npm run test:browser</pre>
+<p>Python 3.13 with numpy, scipy, sgp4, skyfield, pymsis, matplotlib and pillow; the shared JPL DE440s kernel for the Sun table; Node 22+ and Chrome for the tests. Starship IFT-14 supplied the 3-DOF entry framework, the US76 module and the map style. The 3D page is the launch-page template, which grew out of the CZ-6A viewer.</p>
 </main>
 <footer>Illustration: Mickey · base map NASA Blue Marble · MIT license · <a href="./">viewer</a> · <a href="https://github.com/exoplanet5/shenzhou-reentry">repository</a></footer>
 </body>

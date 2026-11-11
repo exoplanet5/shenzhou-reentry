@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "serve": "node tests/serve.mjs 8767",
+    "build": "~/.venvs/astro313/bin/python tools/build_page.py",
+    "serve": "python3 tools/serve.py",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "node tests/browser.mjs"
   }

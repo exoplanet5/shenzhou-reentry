@@ -110,37 +110,13 @@ export const CHINA_CITIES=[
   ['Leshan',103.77,29.55,3],
   ['Yibin',104.64,28.75,3],
   ['Panzhihua',101.72,26.59,3],
-  ['Ejin Banner',101.07,41.95,2],
-  ['Dongfeng Space City',100.29,40.96,2],
-  ['Jinta',98.90,39.98,3],
-  ['Alxa Right Banner',101.67,39.21,3],
-  ['Aksu',80.26,41.17,2],
-  ['Kuqa',82.96,41.72,3],
-  ['Yining',81.32,43.92,2],
-  ['Shihezi',86.04,44.31,3],
-  ['Altay',88.13,47.85,3],
-  ['Ruoqiang',88.17,39.02,3],
 ];
 
 export const CITIES=[...CHINA_CITIES,
   ['Kathmandu',85.30,27.70,1],
   ['New Delhi',77.20,28.60,1],
   ['Hanoi',105.80,21.00,1],
-  ['Ulaanbaatar',106.92,47.92,1],
-  ['Islamabad',73.05,33.69,1],
-  ['Kabul',69.17,34.53,1],
-  ['Dushanbe',68.78,38.56,1],
-  ['Tashkent',69.24,41.30,1],
-  ['Bishkek',74.59,42.87,1],
-  ['Almaty',76.95,43.24,1],
-  ['Samarkand',66.96,39.65,2],
-  ['Khujand',69.63,40.28,2],
-  ['Osh',72.80,40.53,2],
-  ['Naryn',75.98,41.43,3],
-  ['Tehran',51.39,35.69,1],
-  ['Baghdad',44.37,33.31,1],
-  ['Riyadh',46.68,24.69,1],
-  ['Cairo',31.24,30.04,1],
+  // A mission's own corridor cities belong in meta.extra_cities.
 ];
 
 export const CITY_DISTANCES={1:2.9,2:1.75,3:1.38};

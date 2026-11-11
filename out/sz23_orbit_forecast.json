@@ -1,0 +1,260 @@
+{
+ "object": {
+  "name": "CSS (Tianhe)",
+  "norad": 48274,
+  "used_for": "Shenzhou-23"
+ },
+ "source": {
+  "file": "model/elements/css_supgp_2026-11-11.tle",
+  "url": "https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?CATNR=48274&FORMAT=tle",
+  "note": "CelesTrak supplemental GP (data source CSS-E): 6 h segments fitted to the ephemeris published by CMSA."
+ },
+ "segments": [
+  {
+   "name": "CSS [Segment 01]",
+   "epoch": "2026-11-11T00:00:00Z",
+   "mean_motion_rev_day": 15.61652452
+  },
+  {
+   "name": "CSS [Segment 02]",
+   "epoch": "2026-11-11T06:00:00Z",
+   "mean_motion_rev_day": 15.61692567
+  },
+  {
+   "name": "CSS [Segment 03]",
+   "epoch": "2026-11-11T12:00:00Z",
+   "mean_motion_rev_day": 15.61664405
+  },
+  {
+   "name": "CSS [Segment 04]",
+   "epoch": "2026-11-11T18:00:00Z",
+   "mean_motion_rev_day": 15.61713091
+  },
+  {
+   "name": "CSS [Segment 05]",
+   "epoch": "2026-11-12T00:00:00Z",
+   "mean_motion_rev_day": 15.61697251
+  },
+  {
+   "name": "CSS [Segment 06]",
+   "epoch": "2026-11-12T06:00:00Z",
+   "mean_motion_rev_day": 15.61750971
+  },
+  {
+   "name": "CSS [Segment 07]",
+   "epoch": "2026-11-12T12:00:00Z",
+   "mean_motion_rev_day": 15.61714362
+  },
+  {
+   "name": "CSS [Segment 08]",
+   "epoch": "2026-11-12T18:00:00Z",
+   "mean_motion_rev_day": 15.61740655
+  },
+  {
+   "name": "CSS [Segment 09]",
+   "epoch": "2026-11-13T00:00:00Z",
+   "mean_motion_rev_day": 15.61733569
+  },
+  {
+   "name": "CSS [Segment 10]",
+   "epoch": "2026-11-13T06:00:00Z",
+   "mean_motion_rev_day": 15.61732197
+  },
+  {
+   "name": "CSS [Segment 11]",
+   "epoch": "2026-11-13T12:00:00Z",
+   "mean_motion_rev_day": 15.60579435
+  },
+  {
+   "name": "CSS [Segment 12]",
+   "epoch": "2026-11-13T18:00:00Z",
+   "mean_motion_rev_day": 15.60612289
+  },
+  {
+   "name": "CSS [Segment 13]",
+   "epoch": "2026-11-14T00:00:00Z",
+   "mean_motion_rev_day": 15.60595862
+  },
+  {
+   "name": "CSS [Segment 14]",
+   "epoch": "2026-11-14T06:00:00Z",
+   "mean_motion_rev_day": 15.60660518
+  },
+  {
+   "name": "CSS [Segment 15]",
+   "epoch": "2026-11-14T12:00:00Z",
+   "mean_motion_rev_day": 15.60610207
+  },
+  {
+   "name": "CSS [Segment 16]",
+   "epoch": "2026-11-14T18:00:00Z",
+   "mean_motion_rev_day": 15.60644198
+  },
+  {
+   "name": "CSS [Segment 17]",
+   "epoch": "2026-11-15T00:00:00Z",
+   "mean_motion_rev_day": 15.60638218
+  },
+  {
+   "name": "CSS [Segment 18]",
+   "epoch": "2026-11-15T06:00:00Z",
+   "mean_motion_rev_day": 15.60702893
+  },
+  {
+   "name": "CSS [Segment 19]",
+   "epoch": "2026-11-15T12:00:00Z",
+   "mean_motion_rev_day": 15.60657035
+  },
+  {
+   "name": "CSS [Segment 20]",
+   "epoch": "2026-11-15T18:00:00Z",
+   "mean_motion_rev_day": 15.60678886
+  },
+  {
+   "name": "CSS [Segment 21]",
+   "epoch": "2026-11-16T00:00:00Z",
+   "mean_motion_rev_day": 15.60665722
+  },
+  {
+   "name": "CSS [Segment 22]",
+   "epoch": "2026-11-16T06:00:00Z",
+   "mean_motion_rev_day": 15.60737255
+  },
+  {
+   "name": "CSS [Segment 23]",
+   "epoch": "2026-11-16T12:00:00Z",
+   "mean_motion_rev_day": 15.60689992
+  },
+  {
+   "name": "CSS [Segment 24]",
+   "epoch": "2026-11-16T18:00:00Z",
+   "mean_motion_rev_day": 15.6072732
+  },
+  {
+   "name": "CSS [Segment 25]",
+   "epoch": "2026-11-17T00:00:00Z",
+   "mean_motion_rev_day": 15.60706777
+  },
+  {
+   "name": "CSS [Segment 26]",
+   "epoch": "2026-11-17T06:00:00Z",
+   "mean_motion_rev_day": 15.60761774
+  },
+  {
+   "name": "CSS [Segment 27]",
+   "epoch": "2026-11-17T12:00:00Z",
+   "mean_motion_rev_day": 15.60737864
+  },
+  {
+   "name": "CSS [Segment 28]",
+   "epoch": "2026-11-17T18:00:00Z",
+   "mean_motion_rev_day": 15.60762827
+  }
+ ],
+ "manoeuvre": {
+  "segment": "CSS [Segment 10]",
+  "window_utc": [
+   "2026-11-13T06:00:00Z",
+   "2026-11-13T12:00:00Z"
+  ],
+  "mean_motion_before": 15.617336,
+  "mean_motion_after": 15.605794
+ },
+ "fit": {
+  "epoch": "2026-11-17T18:00:00Z",
+  "line1": "1 69180U 26113A   26321.75000000  .00000000  00000-0  19968-3 0  9999",
+  "line2": "2 69180  41.4679 108.7708 0007680 292.3004 344.7832 15.60744506    08",
+  "bstar": 0.00019968359879061066,
+  "mean_motion_rev_day": 15.607445059027313,
+  "mean_altitude_km": 385.5,
+  "samples": 648,
+  "span_utc": [
+   "2026-11-13T12:00:00Z",
+   "2026-11-18T00:00:00Z"
+  ],
+  "rms_rtn_km": [
+   0.153,
+   0.586,
+   0.207
+  ],
+  "max_rtn_km": [
+   0.442,
+   1.501,
+   0.637
+  ]
+ },
+ "site": {
+  "name": "Dongfeng landing site",
+  "lat": 41.65361,
+  "lon": 100.75361,
+  "alt_km": 1.0
+ },
+ "passes": [
+  {
+   "closest_utc": "2026-11-29T19:20:00Z",
+   "cross_track_km": 319.7,
+   "subpoint": [
+    38.895,
+    101.873
+   ],
+   "height_km": 383.1,
+   "heading_deg": 73.0,
+   "landing_estimate_utc": "2026-11-29T19:35:27Z",
+   "drag_30pct": {
+    "time_s": [
+     44.0,
+     -44.0
+    ],
+    "cross_track_km": [
+     315.4,
+     324.0
+    ]
+   }
+  },
+  {
+   "closest_utc": "2026-11-29T20:56:46Z",
+   "cross_track_km": 2.4,
+   "subpoint": [
+    41.621,
+    100.754
+   ],
+   "height_km": 385.0,
+   "heading_deg": 89.1,
+   "landing_estimate_utc": "2026-11-29T21:12:13Z",
+   "drag_30pct": {
+    "time_s": [
+     44.0,
+     -45.0
+    ],
+    "cross_track_km": [
+     2.2,
+     2.7
+    ]
+   }
+  },
+  {
+   "closest_utc": "2026-11-29T22:33:32Z",
+   "cross_track_km": 262.1,
+   "subpoint": [
+    39.372,
+    99.913
+   ],
+   "height_km": 386.0,
+   "heading_deg": 105.5,
+   "landing_estimate_utc": "2026-11-29T22:48:59Z",
+   "drag_30pct": {
+    "time_s": [
+     45.0,
+     -44.0
+    ],
+    "cross_track_km": [
+     266.1,
+     258.1
+    ]
+   }
+  }
+ ],
+ "chosen": {
+  "2026-11-29": "2026-11-29T20:56:46Z"
+ }
+}

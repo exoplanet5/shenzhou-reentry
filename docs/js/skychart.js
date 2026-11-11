@@ -57,8 +57,8 @@ const CSS = `
 @media (max-width:860px){.skw{left:max(16px,env(safe-area-inset-left,0px))!important;right:max(16px,env(safe-area-inset-right,0px));width:auto!important;min-width:0;top:calc(var(--bar,50px) + 12px + env(safe-area-inset-top,0px))!important;height:75dvh!important;min-height:0;resize:none}.skc-toolbar{flex-wrap:wrap;right:6px}.skc-loc input{width:85px}}
 `;
 
-// styleAt(met, t0ms) -> {color, lit, powered, plasma, hud}; mark: {met, label} drawn inside a pass (e.g. entry interface);
-// metStart/metEnd bound the pass search (the flight may start at a negative MET).
+// styleAt(met, t0ms) -> {color, lit, powered, plasma?, hud?}; mark: {met, label}, an event drawn inside a pass, such as the final cutoff (the end of
+// the plume-making flight) or an entry interface; metStart/metEnd bound the pass search, since a flight may start at a negative MET.
 export function createSkyChart({ shipAt, metStart = () => 0, metEnd, styleAt, mark = null, vehicle, getState, onJump, fmtMET, sunSubpoint = A.sunSubpoint, sunPosition = null, onSite = () => {} }) {
   const solarLook = (utc) => {
     if (!sunPosition) return A.altAzOfSubpoint(frame, sunSubpoint(utc));
@@ -116,7 +116,7 @@ export function createSkyChart({ shipAt, metStart = () => 0, metEnd, styleAt, ma
     let sec = 0;
     for (let i = 1; i < q.pts.length; i++) {
       const p = q.pts[i], utc = t0ms + p.met * 1000;
-      if (p.el < 15) continue;
+      if (p.el < A.MIN_ELEVATION_DEG) continue;
       const sty = styleAt(p.met, t0ms);
       if ((sty.lit || sty.plasma) && solarLook(utc).alt <= 0) sec += p.met - q.pts[i - 1].met;
     }
@@ -394,7 +394,7 @@ export function createSkyChart({ shipAt, metStart = () => 0, metEnd, styleAt, ma
 
   function drawPass(m, q, st) {
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    // glow under the plasma trail and the sunlit burn arc
+    // jellyfish glow under the sunlit powered arc (the lit exhaust cloud lingers along it after SECO-1)
     ctx.lineWidth = 9;
     let prev = null;
     for (const p of q.pts) {
@@ -434,9 +434,9 @@ export function createSkyChart({ shipAt, metStart = () => 0, metEnd, styleAt, ma
       let lx = xy.x + 5; if (lx + w > cssW - 3) lx = xy.x - 5 - w;
       if (free(lx, xy.y - 15, w, 12)) { timeBox(lbl, lx, xy.y - 5); boxes.push([lx, xy.y - 15, w, 12]); }
     }
-    // marked event inside this pass (entry interface)
+    // marked event inside this pass: the final cutoff (end of the plume) or an entry interface
     if (mark && mark.met >= q.aos && mark.met <= q.los) {
-      const seco = mark.met, s = shipAt(seco), la = A.lookAngles(frame, s.p), xy = project(la.az, la.el, m), c = styleAt(seco + 1, st.t0ms).color;
+      const seco = mark.met, s = shipAt(seco), la = A.lookAngles(frame, s.p), xy = project(la.az, la.el, m), c = styleAt(seco - 1, st.t0ms).color;
       ctx.save(); ctx.translate(xy.x, xy.y); ctx.rotate(Math.PI / 4);
       ctx.fillStyle = c; ctx.strokeStyle = '#080a0e'; ctx.lineWidth = 1; ctx.fillRect(-3.5, -3.5, 7, 7); ctx.strokeRect(-3.5, -3.5, 7, 7); ctx.restore();
       ctx.font = '10px ' + MONO; haloText(`${mark.label} ${fmtMET(seco)}`, xy.x + 7, xy.y + 9, '#e8eaed');
@@ -488,7 +488,7 @@ export function createSkyChart({ shipAt, metStart = () => 0, metEnd, styleAt, ma
       ctx.font = '11px ' + MONO; haloText(vehicle, p.x + 8, p.y, '#ffffff');
     }
     // HUD
-    const litTxt = sty.hud ?? (sty.lit ? (sty.powered ? '● burn sunlit' : '● sunlit') : (sty.powered ? '✕ burn in Earth shadow' : '✕ in Earth shadow'));
+    const litTxt = sty.hud ?? (sty.lit ? (sty.powered ? '● plume sunlit (jellyfish)' : '● sunlit') : (sty.powered ? '✕ plume in Earth shadow' : '✕ in Earth shadow'));
     let txt = `${vehicle}  AZ ${la.az.toFixed(1)}°  EL ${la.el.toFixed(1)}°  RNG ${la.rng.toFixed(0)} km  |  ${litTxt} · site sun ${sun.alt.toFixed(1)}° (${STAGE(sun.alt)})`;
     if (la.el <= 0 && pi >= 0) {
       const q = passes[pi];

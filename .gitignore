@@ -4,3 +4,5 @@ __pycache__/
 node_modules/
 .test-artifacts/
 out/solve_*.log
+.shots/
+out/web/

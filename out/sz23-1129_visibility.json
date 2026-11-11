@@ -1,0 +1,23 @@
+{
+ "mission": "sz23-1129",
+ "kind": "forecast",
+ "reference_epoch_utc": "2026-11-29T20:54:21Z",
+ "min_elevation_deg": 10.0,
+ "plasma_utc": [
+  "2026-11-29T20:51:56Z",
+  "2026-11-29T20:56:46Z"
+ ],
+ "zone_area_km2": 1271194,
+ "extent": [
+  66.0,
+  112.0,
+  30.0,
+  51.0
+ ],
+ "sun_at_site_deg": -38.3,
+ "sunlight_pickup": null,
+ "notes": [
+  "Zone: sea-level sites with some point of the 80-40 km plasma trail at 10 degrees elevation or more and the Sun below the horizon at the reference epoch.",
+  "The trail is self-luminous; its brightness is not modeled. No terrain, weather or extinction."
+ ]
+}

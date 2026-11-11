@@ -6,7 +6,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 const [query='',out='shot.png',clipArg]=process.argv.slice(2);
-const base=process.env.VIEWER_URL||'http://127.0.0.1:8767/';
+const base=process.env.VIEWER_URL||'http://127.0.0.1:8770/';
 const chromePath=process.env.CHROME||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const profile=await fs.mkdtemp(path.join(os.tmpdir(),'sz-shot-'));
 const chrome=spawn(chromePath,['--headless=new','--remote-debugging-port=0',`--user-data-dir=${profile}`,'--no-first-run','--no-default-browser-check','about:blank'],{stdio:'ignore'});
@@ -27,7 +27,7 @@ try{
   const isPage=/^[\w.-]+\.html/.test(query);
   await call('Page.navigate',{url:base+(isPage?query:(query?'?'+query:''))});
   if(isPage){await wait('document.readyState==="complete"');await delay(1200);}
-  else{await wait('!!window.__sz && !document.getElementById("loading")');await delay(1500);await wait('__sz.mapLOD.stats().active===0');await delay(400);}
+  else{await wait('!!window.__globe && !document.getElementById("loading")');await delay(1500);await wait('__globe.mapLOD.stats().active===0');await delay(400);}
   if(process.env.SCROLL){await evaluate(`window.scrollTo(0,${+process.env.SCROLL})`);await delay(800);}
   const clip=clipArg?Object.fromEntries(['x','y','width','height'].map((k,i)=>[k,+clipArg.split(',')[i]])):undefined;
   const r=await call('Page.captureScreenshot',{format:'png',...(clip?{clip:{...clip,scale:+(process.env.SCALE||2)}}:{})});

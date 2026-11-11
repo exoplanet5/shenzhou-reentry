@@ -1,16 +1,27 @@
 {
-  "schema_version": 2,
+  "schema_version": 1,
   "default_profile": "shenzhou",
+  "supported_families": [
+    "retrograde",
+    "polar",
+    "sso",
+    "low-inclination"
+  ],
   "profiles": [
     {
       "id": "shenzhou",
       "label": "Shenzhou · return from the China Space Station",
-      "family": "capsule",
-      "default_mission": "sz20",
+      "family": "low-inclination",
+      "default_mission": "sz23-1129",
       "missions": [
         {
+          "id": "sz23-1129",
+          "label": "Shenzhou-23 · 29 Nov 21:12 UTC (forecast)",
+          "file": "data/sz23-1129.json"
+        },
+        {
           "id": "sz20",
-          "label": "Shenzhou-20 · 2026-01-19 (uncrewed)",
+          "label": "Shenzhou-20 · 19 Jan 2026 (uncrewed)",
           "file": "data/sz20.json"
         }
       ]

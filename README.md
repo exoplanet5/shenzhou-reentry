@@ -1,40 +1,95 @@
 # Shenzhou reentry
 
-Physical reconstruction of a Shenzhou return from the China Space Station — deorbit burn, coast, service-module
-separation, lifting capsule entry, plasma blackout, parachutes and touchdown at the Dongfeng landing site — with an
-interactive 3D page. First mission: the **uncrewed return of Shenzhou-20 on 19 January 2026** (the spacecraft with the
-cracked window), landed 01:34 UTC at 41.654 N 100.754 E.
+Physical model of a Shenzhou return from the China Space Station — deorbit burn, coast, service-module separation,
+lifting capsule entry, plasma blackout, parachutes and touchdown at the Dongfeng landing site — with an interactive 3D
+page. Two uses so far:
 
-![Entry corridor map](out/sz20_map.png)
-![Entry profile](out/sz20_profile.png)
+- **Forecast: Shenzhou-23, 29 November 2026 (UTC).** Made on 11 November from the station's published orbit after
+  the 13 November reboost. The pass of 29 November crosses the site at 2.4 km: touchdown 21:12 UTC (05:12 Beijing time
+  on 30 November), at night. See [the forecast](#shenzhou-23-forecast-29-november-2026).
+- **Reconstruction: the uncrewed return of Shenzhou-20 on 19 January 2026** (the spacecraft with the cracked window),
+  landed 01:34 UTC at 41.654 N 100.754 E.
 
-**Interactive page:** <https://exoplanet5.github.io/shenzhou-reentry/> (GitHub Pages from `docs/`), or `docs/index.html`
-served locally over HTTP (see below). **Methodology and results write-up:** <https://exoplanet5.github.io/shenzhou-reentry/model.html>
-(`docs/model.html`). It is the CZ-6A / Starship IFT-14 viewer
-adapted to a reentry: free-flight orbit, deorbit burn, capsule entry with the self-luminous plasma trail, parachute
-descent, day/night and nautical-twilight terminators, major cities with pop-up sky charts, a status panel with speed,
-Mach, load and range to the site, and a "reconstruction vs reported" table.
+![Reentry visibility, 29 November](out/sz23-1129_visibility.png)
+![Entry profile, 29 November](out/sz23-1129_profile.png)
 
-This is a model built from public reports and published Shenzhou return-sequence figures, **not official ephemeris**.
+**Interactive page:** <https://exoplanet5.github.io/shenzhou-reentry/> (GitHub Pages from `docs/`), or served locally
+(see below). **Methodology and results write-up:** <https://exoplanet5.github.io/shenzhou-reentry/model.html>
+(`docs/model.html`). The page is the launch-page template (`~/launch/launch-page-template`) with its reentry fields:
+playback from the orbit before the burn, the capsule cartoon through each phase, the self-luminous plasma trail, the
+landing site, a status panel with air speed, Mach, load and range to the site, a summary table, sky charts for any
+city or ground point, and the Earth-fixed or inertial frame.
+
+These are models built from public reports and published Shenzhou return-sequence figures, **not official ephemeris
+and not an official schedule**.
 
 ## What is here
 
 | path | content |
 |---|---|
 | `deorbit_fit.py`, `SZ-20_reentry_trajectory.csv` | the original Keplerian fit and its SGP4 arc (kept unchanged; audited below) |
-| `model/shenzhou_reentry.py` | 3-DOF reentry model and solver (WGS-84, J2, rotating Earth, NRLMSIS 2.1 / US76, capsule lift and drag, bank steering, parachutes) |
+| `model/shenzhou_reentry.py` | 3-DOF reentry model and solver (WGS-84, J2, rotating Earth, NRLMSIS 2.1 / US76, capsule lift and drag, bank steering, parachutes); reconstruction and prediction modes |
 | `model/atmo.py`, `model/us76.py` | atmosphere models (`us76.py` is the Starship IFT-14 module) |
 | `model/missions/sz20.json` | all inputs for Shenzhou-20: element set, reported times and site, published sequence heights, vehicle data, with sources |
-| `model/atmo_msis_sz20.json` | cached NRLMSIS 2.1 column (so reruns do not need pymsis) |
+| `model/missions/sz23-1129.json` | the Shenzhou-23 forecast, written by `tools/css_orbit.py` |
+| `model/elements/css_supgp_2026-11-11.*` | CelesTrak supplemental elements of the station (NORAD 48274), as fetched on 11 Nov 2026 |
+| `model/atmo_msis_<id>.json` | cached NRLMSIS 2.1 columns (so reruns do not need pymsis) |
 | `sz20_gp_history.json` | Space-Track element sets of SZ-20 (NORAD 63632), 14–19 Jan 2026 |
-| `out/sz20_solution.json`, `out/sz20_trajectory.csv` | solved parameters, events, diagnostics; 1 s trajectory (UTC, lon/lat/WGS-84 height, speeds, Mach, load, heating, phase) |
-| `out/sz20_solution_0045.json`, `_0046`, `_us76` (+ CSVs) | sensitivity runs: ignition 00:45:00 / 00:46:30, US76 atmosphere |
-| `out/sz20_map.png`, `out/sz20_profile.png` | figures above |
-| `tools/export_mission.py` | builds `docs/data/sz20.json` (tracks, events, DE440s Sun table, element sets) and `docs/data/profiles.json` |
-| `tools/plot_map.py`, `tools/plot_profile.py` | figures |
-| `docs/` | the 3D page (three.js vendored, Blue Marble tiles, Natural Earth boundaries, city catalog, sky chart; `globe-math.js` / `globe-camera.js` are the view-point, heading, tilt and range camera from CZ-6A) |
-| `docs/model.html` | write-up of the methodology, the Shenzhou-20 inputs and results (web-sized figures in `docs/img/`) |
-| `tests/` | schema tests (`node --test`), headless-Chrome smoke test, static server |
+| `tools/css_orbit.py` | station orbit forecast from the supplemental elements, passes over the site, forecast mission files |
+| `out/sz23_orbit_forecast.json` | the fitted element set, fit residuals, drag sensitivity and every pass near the site |
+| `out/<id>_solution.json`, `out/<id>_trajectory.csv` | solved parameters, events, diagnostics; 1 s trajectory (UTC, lon/lat/WGS-84 height, speeds, Mach, load, heating, phase) |
+| `out/sz20_solution_0045.json`, `_0046`, `_us76` (+ CSVs) | Shenzhou-20 sensitivity runs: ignition 00:45:00 / 00:46:30, US76 atmosphere |
+| `out/<id>_visibility.png` (+ `.json`), `out/<id>_profile.png`, `out/sz20_map.png` | figures; the JSON holds the map's assumptions |
+| `tools/export_mission.py` | mission JSON for the page in the template's format (`out/web/<id>.json`, not kept in git: tracks, events, capsule cartoon, DE440s Sun and Moon tables, element sets) |
+| `tools/build_page.py` | builds `docs/` from the launch-page template and registers every solved mission |
+| `tools/plot_visibility.py`, `tools/plot_map.py`, `tools/plot_profile.py` | figures |
+| `docs/` | the 3D page: template code, mission data in `docs/data/`, and this project's `docs/model.html` and `docs/img/` |
+| `tests/` | mission tests (`node --test`), headless-Chrome test, screenshot helper |
+
+## Shenzhou-23 forecast, 29 November 2026
+
+Made on 11 November 2026. Shenzhou-24 is expected to launch around 25 November; Shenzhou-23, docked since 24 May,
+then returns with two of its crew and the visiting astronaut. The date is not announced. (The spacecraft that lands is
+Shenzhou-23, during the Shenzhou-24 handover.)
+
+**Orbit.** CelesTrak fits supplemental elements for the station to the ephemeris CMSA publishes, in 6-hour segments;
+that ephemeris includes planned manoeuvres. The set of 11 November has 28 segments to 18 November 00:00 UTC and shows
+the reboost in the segment of 13 November 06:00–12:00 UTC (mean motion 15.6173 → 15.6058 rev/day, about +1.9 km).
+Each segment is valid forward from its epoch. `tools/css_orbit.py` samples the 18 segments after the reboost and fits
+one SGP4 set (mean elements and B*) to them: 0.6 km RMS along track over 4.5 days, B* 2.0e-4. That set is propagated
+12 days.
+
+```
+1 69180U 26113A   26321.75000000  .00000000  00000-0  19968-3 0  9999
+2 69180  41.4679 108.7708 0007680 292.3004 344.7832 15.60744506    08
+```
+
+**Passes.** The site lies at the top of the ground track, so the track crosses it heading east. The pass of
+29 November misses the Shenzhou-20 landing point by 2.4 km — the Shenzhou-20 pass itself missed by 2.3 km — so this
+is the pass the reboost phases for. The other passes of that day miss by 260 km or more.
+
+**Descent.** The Shenzhou-20 reconstruction moved onto this pass: the same burn (138.8 m/s in 160 s) and bank
+magnitude (47°); the ignition time and the bank reversal are solved for the aim point; the landing time is an output.
+The ignition is then put on a whole second, which moves the bank by up to 0.2°.
+
+| UTC date | pass over the site | track south of site | ignition | entry 100 km | plasma 80–40 km | touchdown | Beijing time | Sun at site |
+|---|---|---|---|---|---|---|---|---|
+| 29 Nov | 20:56:46 | 2.4 km | 20:24:04 | 20:50:40 | 20:51:56 – 20:56:46 | 21:12:13 | 30 Nov 05:12 | −38° |
+
+A night landing. Entry angle −2.00° at 100 km, 3.3 g, peak heating 69 W/cm², blackout 4.8 min.
+The capsule is in the Earth's shadow throughout, so only the plasma trail's own light shows, from about 79.5° E over
+the western Tarim basin to 99° E. The map's 10° zone (sea-level sites that have some point of the 80–40 km trail at
+10° or more, Sun below the horizon) covers 1.27 million km². There is no sunlight pickup to mark.
+
+**Uncertainty.**
+
+- The day and the pass are CMSA's choice; the orbit only says which pass lines up.
+- Drag: ±30 % over the propagation moves the pass by ±45 s. These are the page's T0 presets.
+- A further station manoeuvre before the return moves the pass by minutes. The published ephemeris ends on
+  18 November: fetch it again nearer the date and rerun (see Reproduce).
+- The burn and bank are Shenzhou-20's. A different entry angle changes the burn-to-landing time by tens of seconds.
+- After undocking the spacecraft leaves the station orbit by a few km; the forecast uses the station's.
+- The aim point is the Shenzhou-20 landing point. Winds are not modeled.
 
 ## Audit of the original model (`deorbit_fit.py`, `SZ-20_reentry_trajectory.csv`)
 
@@ -131,6 +186,10 @@ to 99.0 E in the Gobi west of Ejin Banner, 09:14–09:19 Beijing time, with the 
 −3° at peak heating, +4° at blackout end): a dawn fireball over Xinjiang in nautical-to-civil twilight, visible from
 Aksu, Korla or Hami had the sky been clear.
 
+![Shenzhou-20 entry corridor](out/sz20_map.png)
+![Shenzhou-20 reentry visibility](out/sz20_visibility.png)
+![Shenzhou-20 entry profile](out/sz20_profile.png)
+
 ### Sensitivity
 
 | ignition (UTC) · atmosphere | Δv m/s | perigee km | γ at 100 km | γ at 120 km | bank ° | max g | peak W/cm² | blackout min | burn→entry min | entry→chute min | thrust kN |
@@ -154,56 +213,63 @@ only; the landing coordinates are from Wikipedia, not CMSA; the terrain height i
 ## Interactive page
 
 ```sh
-node tests/serve.mjs 8767          # or: python3 -m http.server 8767 --bind 127.0.0.1 --directory docs
-# open http://127.0.0.1:8767/
+python3 tools/serve.py             # http://127.0.0.1:8770/
 ```
 
+- The mission menu holds the Shenzhou-23 forecast and the Shenzhou-20 reconstruction; it opens on the forecast. Changing
+  the mission keeps the camera, frame and MET.
 - T± is time from deorbit-burn ignition; the slider runs from one orbit before the burn to touchdown. Space toggles
-  playback, arrows seek 10 s (300 s with Shift). Click the timeline to jump; hover the track to inspect.
-- T0 (burn ignition) can be shifted within the day: the Earth-fixed track stays, only the Sun moves — for exploring
-  how the same descent would be lit at another hour. The "Actual" preset restores 00:45:45.
-- Click any city or anywhere on the globe for its sky chart (passes, Sun/Moon, stars); the plasma phase is drawn as
-  a self-luminous orange arc. The green dashed 15° circle follows the capsule.
-- The status panel shows phase, altitude, air-relative and inertial speed, Mach and load, illumination, ground
-  lighting and the range to the site; the "Reconstruction vs reported" table summarises the solution.
-- Element sets: the observed pre-burn Space-Track set and the model deorbit ellipse at burn cutoff (perigee below the
-  surface, placeholder catalog number 00000).
-- **Drag** the globe to turn it; the grabbed ground follows the pointer. **Right-drag**, Ctrl/Shift-drag or a **two-finger
-  drag** tilts and rotates the camera around the point at the centre of the view, Google Earth style; a two-finger twist
-  rotates too. Scroll or pinch to zoom toward that point. The camera stays at least 319 km above the surface and within
-  80° of vertical; the camera presets reset to a north-up vertical view. The phone header keeps the UTC date, time and
-  T± on one line with the vehicle name.
+  playback, arrows seek 10 s (300 s with Shift). Click the track or a timeline row to jump; hover the track to inspect.
+- T0 (burn ignition) can be shifted: the Earth-fixed track stays and only the Sun moves. Forecasts have three
+  presets, the model time and the ±30 % drag bounds; the reconstruction has "Actual".
+- The cartoon follows the sequence: three modules in orbit, two for the retro burn (engine first), the capsule alone
+  behind its heat shield, in its plasma sheath, scorched, then upright under the drogue and the main parachute.
+- Click any city or anywhere on the globe for its sky chart. The plasma phase is drawn as a self-luminous orange arc
+  and counted as visible in a dark sky whether or not the Sun reaches it. The green dashed 10° circle follows the capsule.
+- The status panel shows phase, altitude, inertial and air speed, Mach and load, illumination, ground lighting and
+  the range and time to the landing site; "Forecast summary" or "Reconstruction vs reported" gives the solution.
+- ECEF / GCRS in the title bar switches between ground tracks over the turning Earth and a fixed orbit with the Earth
+  turning under it. Layers: terminators, labels, ground track, graticule, cities, city lights, borders, stars with Sun
+  and Moon.
+- **Drag** turns the globe; **right-drag**, Ctrl/Shift-drag or **two fingers** tilt and rotate about the view point;
+  scroll or pinch zooms. The camera presets reset to a north-up vertical view.
 - URL parameters restore a view, e.g. `?mission=sz20&met=1850&cam=92,40.5,1.5&sky=Jiuquan`; `cam` is
-  `lon,lat,dist,heading,tilt` (the last two optional).
-- Imagery, boundaries and cities are the CZ-6A layers (Blue Marble tile pyramid to 21600 px, Natural Earth lines in
-  the China-claims view, 138 cities including the Central Asian corridor). Credits and licenses are in `docs/data/*LICENSE*`
-  and `docs/tex/TILES-LICENSE.txt`.
+  `lon,lat,dist,heading,tilt` (the last two optional), `frame=gcrs` the inertial view.
 
-Mission data contract: `docs/data/<id>.json` with `schema_version: 2`, `kind: "reentry"`, uniform `tracks`
-(`orbit`, `deorbit`, `entry`, `descent`; each with `met0`, `dt`, `lon`, `lat`, `alt` and the extra arrays `vrel`,
-`vin`, `mach`, `g`), `meta` (site, T0 range, `met_min`, `powered_intervals`, `plasma_intervals`, phases, views,
-reported values, diagnostics, notes), `events` (with `key`, `major`, `official`), `zones` (may be empty), `tle_ref`
-and the DE440s `sun` table. Validation is in `docs/js/profile.js`; `tools/export_mission.py --check` verifies that
-the published JSON is a reproducible build of the model outputs.
+The page code is the template's and is not edited here: `tools/build_page.py --upgrade` rebuilds `docs/` from the
+current template and carries over `docs/model.html` and `docs/img/`. The reentry features are optional mission
+fields of the template (`meta.met_min`, `meta.landing`, `meta.plasma_intervals`, the `service` / `capsule` /
+`orbital` stack kinds, `meta.summary`, track arrays `vrel`, `vin`, `mach`, `g`), described under "Reentry missions"
+in the template's `PROFILE_FORMAT.md`. `tools/export_mission.py --id <id> --check` verifies that a published mission
+file is a reproducible build of the model outputs.
 
 ## Reproduce
 
 Python 3.13 environment with numpy, scipy, sgp4, skyfield, pymsis (only for a fresh MSIS column), matplotlib, pillow;
-the shared `~/JPLDE/de440s.bsp` for the Sun table; Node 22+ and Chrome for the tests.
+the shared `~/JPLDE/de440s.bsp` for the Sun and Moon tables; Node 22+ and Chrome for the tests; the launch-page skill
+and template for the page.
 
 ```sh
 P=~/.venvs/astro313/bin/python
+# Shenzhou-20 reconstruction
 $P model/shenzhou_reentry.py --solve                          # nominal (about 3 min); --tign 00:46:30 --tag _0046 for variants
 $P model/shenzhou_reentry.py --solve --atmo us76 --tag _us76
-$P model/shenzhou_reentry.py --export                         # re-export CSV/JSON from the cached solution
-$P tools/export_mission.py                                    # docs/data/sz20.json + profiles.json (DE440s Sun vectors)
-$P tools/plot_map.py && $P tools/plot_profile.py
-npm test                                                      # schema tests
-npm run serve & npm run test:browser                          # headless-Chrome smoke test, screenshots in .test-artifacts/
+# Shenzhou-23 forecast: fetch the current elements, forecast the orbit, solve
+curl -o model/elements/css_supgp_$(date -u +%F).tle 'https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?CATNR=48274&FORMAT=tle'
+$P tools/css_orbit.py --supgp model/elements/css_supgp_2026-11-11.tle --dates 2026-11-29
+$P model/shenzhou_reentry.py --mission model/missions/sz23-1129.json --solve     # about 2 min
+# page and figures
+$P tools/build_page.py                                        # export every solved mission, register it in docs/ (--upgrade: new template)
+for id in sz23-1129 sz20; do $P tools/plot_visibility.py --id $id; $P tools/plot_profile.py --id $id; done
+$P tools/plot_map.py                                          # Shenzhou-20 entry-corridor map
+npm test                                                      # mission tests
+python3 tools/serve.py & npm run test:browser                 # headless-Chrome test, screenshots in .test-artifacts/
+$P ~/.claude/skills/launch-page/scripts/check_page.py .       # the template's performance budgets
 ```
 
-To add another return (e.g. Shenzhou-22 on 29 May 2026), copy `model/missions/sz20.json`, fill in the element set
-(`st.py gp <norad> --from … --lines`), reported times and site, then run the same chain with `--mission` / `--id`.
+To add another return, copy `model/missions/sz20.json` for a reconstruction (element set from `st.py gp <norad>
+--from … --lines`, reported times and site) or run `tools/css_orbit.py` with other dates, `--id` and `--name` for a
+forecast; then solve and run `tools/build_page.py`. Its `DEFAULT` sets the mission the page opens on.
 
 ## Sources
 
@@ -211,9 +277,11 @@ CMSA / Xinhua / CCTV reports of 19 Jan 2026 (undocking 00:23 Beijing, orbital-mo
 Beijing at Dongfeng); the Wikipedia Shenzhou 20 article for the landing coordinates; CCTV / Xinhua / CASC
 return-sequence explainers (Shenzhou-14, -16, -20) for the sequence heights, burn duration, blackout, parachute and
 retro-rocket figures; astronautix.com, braeunig.us and China Space Report for the vehicle (masses, dimensions, L/D,
-engines, parachute areas); Space-Track for the element sets. Starship IFT-14 (`~/sda/starship-ITF-14`) supplied the
-3-DOF entry framework, the US76 module and the map style; CZ-6A (`~/launch/CZ-6A`) the viewer, exporter contract and
-map layers.
+engines, parachute areas); Space-Track for the Shenzhou-20 element sets; CelesTrak supplemental GP data (source CSS-E,
+from the CMSA ephemeris) for the station orbit of the forecast; GCAT (J. McDowell) for the Shenzhou-23 launch and
+catalog number; press reports of the expected Shenzhou-24 launch date. Starship IFT-14 (`~/sda/starship-ITF-14`) supplied the
+3-DOF entry framework, the US76 module and the map style; the launch-page template (`~/launch/launch-page-template`,
+grown from the CZ-6A viewer) the 3D page.
 
 ## Credits
 

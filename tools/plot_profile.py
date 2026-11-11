@@ -24,7 +24,7 @@ name = sol['inputs']['name']
 
 fig = plt.figure(figsize=(13.2, 8.4), facecolor=BG)
 fig.text(0.012, 0.975, f'{name} reentry', color='#cfd6dd', fontsize=13, fontweight='bold', va='center')
-fig.text(0.19, 0.975, f"deorbit burn {d['t_ign_utc'][:10]} {d['t_ign_utc'][11:19]} UTC  ·  touchdown {d['landing_utc'][11:19]} UTC  ·  3-DOF reconstruction", color=DIM, fontsize=11, va='center')
+fig.text(0.19, 0.975, f"deorbit burn {d['t_ign_utc'][:10]} {d['t_ign_utc'][11:19]} UTC  ·  touchdown {d['landing_utc'][11:19]} UTC  ·  3-DOF {'forecast' if sol['inputs'].get('kind') == 'prediction' else 'reconstruction'}", color=DIM, fontsize=11, va='center')
 axes = [fig.add_axes([0.07, 0.56, 0.86, 0.38]), fig.add_axes([0.07, 0.09, 0.86, 0.40])]
 for ax in axes:
     ax.set_facecolor(PANEL)

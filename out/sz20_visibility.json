@@ -1,0 +1,28 @@
+{
+ "mission": "sz20",
+ "kind": "reconstruction",
+ "reference_epoch_utc": "2026-01-19T01:16:34Z",
+ "min_elevation_deg": 10.0,
+ "plasma_utc": [
+  "2026-01-19T01:14:07Z",
+  "2026-01-19T01:19:01Z"
+ ],
+ "zone_area_km2": 953556,
+ "extent": [
+  66.0,
+  112.0,
+  30.0,
+  51.0
+ ],
+ "sun_at_site_deg": 5.1,
+ "sunlight_pickup": {
+  "utc": "2026-01-19T01:14:05Z",
+  "lon": 79.2,
+  "lat": 39.13,
+  "alt_km": 80.4
+ },
+ "notes": [
+  "Zone: sea-level sites with some point of the 80-40 km plasma trail at 10 degrees elevation or more and the Sun below the horizon at the reference epoch.",
+  "The trail is self-luminous; its brightness is not modeled. No terrain, weather or extinction."
+ ]
+}

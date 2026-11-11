@@ -1,17 +1,17 @@
 const RAD=Math.PI/180;
-export const TILE_CONFIG={tileSize:675,gutter:1,baseColumns:4,baseRows:2,minLevel:1,maxLevel:3,maxTiles:32,concurrency:4};
+export const TILE_CONFIG={tileSize:675,gutter:1,baseColumns:4,baseRows:2,minLevel:2,maxLevel:3,maxTiles:32,concurrency:4};
 
 export function worldPixels(level){return TILE_CONFIG.tileSize*(TILE_CONFIG.baseColumns<<level);}
 export function projectedPixels(distance,fov,height,pixelRatio=1){
   return Math.PI*height*Math.min(2,Math.max(1,pixelRatio))/(Math.tan(fov*RAD/2)*Math.max(.05,distance-1));
 }
-export function chooseLevel(required,previous=-1){
+// baseWidth is the permanent globe texture: tiles are needed only above it.
+export function chooseLevel(required,previous=-1,baseWidth=8192){
   if(!Number.isFinite(required)||required<=0)return -1;
-  const ceilings=[4096,5400,10800,21600];
-  let target=required<=4096?-1:required<=5400?1:required<=10800?2:3;
+  const target=required<=baseWidth?-1:required<=10800?2:3;
   // Small zoom gestures near a threshold must not repeatedly replace textures.
-  if(previous>=-1&&previous<=3&&target!==previous){
-    const boundary=target>previous?(previous<=0?4096:ceilings[previous]):(previous<=1?4096:ceilings[previous-1]);
+  if(target!==previous&&(previous===-1||previous===2||previous===3)){
+    const low=Math.min(target,previous),boundary=low<0?baseWidth:10800;
     if(target>previous&&required<boundary*1.12)return previous;
     if(target<previous&&required>boundary*.88)return previous;
   }
@@ -38,7 +38,7 @@ export class TileCache {
     this.pump();
   }
   pump(){
-    if(this.stopped)return;
+    if(this.stopped||this.paused)return;
     for(const [key,tile]of this.wanted){
       if(this.active>=this.concurrency)break;
       const existing=this.entries.get(key);

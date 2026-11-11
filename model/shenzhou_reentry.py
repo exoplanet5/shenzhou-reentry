@@ -7,11 +7,19 @@ retrograde deorbit burn, capsule drag and lift with Mach-dependent coefficients 
 reversal, then drogue and main parachutes to the terrain height of the landing site. The orbit before the burn is
 SGP4 from the spacecraft's own element set.
 
-Free parameters, solved against the reported landing point and time (least squares) for a given burn ignition
-time (the reported orbital-module separation minute plus the attitude slew):
+Reconstruction (a mission file with a "reported" block): free parameters solved against the reported landing point
+and time (least squares) for a given burn ignition time (the reported orbital-module separation minute plus the
+attitude slew):
     dv       burn delta-v                         -> landing time (the entry angle follows)
     sigma    bank-angle magnitude                 -> down-range
     t_rev    time of the single bank reversal     -> cross-range
+
+Prediction (a mission file with "kind": "prediction" and a "target" block, written by tools/css_orbit.py): the burn
+delta-v and the bank magnitude are taken from an earlier reconstruction, and the landing time is an output:
+    t_ign    burn ignition time                   -> down-range
+    t_rev    time of the single bank reversal     -> cross-range
+The ignition is then put on a whole second and the bank magnitude takes up the fraction (a few tenths of a degree).
+If the reversal alone cannot reach the site (a pass well to one side), the bank magnitude is solved as well.
 
     python model/shenzhou_reentry.py --mission model/missions/sz20.json --solve [--atmo msis|us76]
     python model/shenzhou_reentry.py --mission model/missions/sz20.json --export     # from the cached solution
@@ -118,9 +126,11 @@ class Mission:
         c = self.cfg
         self.id, self.name = c['id'], c['name']
         self.sat = Satrec.twoline2rv(c['tle']['line1'], c['tle']['line2'])
-        rep, des, veh = c['reported'], c['design'], c['vehicle']
-        self.t_land_rep = utc(rep['landing_utc'])
-        self.t_omsep_rep = utc(rep['om_separation_utc'])
+        self.prediction = c.get('kind') == 'prediction'
+        rep, des, veh = c['target' if self.prediction else 'reported'], c['design'], c['vehicle']
+        self.t_land_rep = None if self.prediction else utc(rep['landing_utc'])
+        self.t_omsep_rep = None if self.prediction else utc(rep['om_separation_utc'])
+        self.atmo_epoch = rep['landing_estimate_utc'] if self.prediction else rep['landing_utc']
         self.site = (rep['landing_lat'], rep['landing_lon'])
         self.h_site = rep['landing_alt_km']
         self.gamma_ref, self.gamma_ref_km = des['gamma_ref_deg'], des['gamma_ref_km']
@@ -331,6 +341,83 @@ def solve(mission, atmo, t_ign):
     return best.x
 
 
+def newton2(f, x, steps, lo, hi, tol=0.02, max_iter=25):
+    """Damped Newton iteration for two residuals in two unknowns, with fixed finite-difference steps (the library
+    solver's relative steps are far too small for an ignition time near zero). Returns (x, |f|)."""
+    x = np.array(x, float)
+    r = f(x)
+    for _ in range(max_iter):
+        if np.hypot(*r) < tol:
+            break
+        J = np.empty((2, 2))
+        for k in range(2):
+            d = steps[k] if x[k] + steps[k] <= hi[k] else -steps[k]
+            y = x.copy()
+            y[k] += d
+            J[:, k] = (f(y) - r) / d
+        try:
+            dx = np.linalg.lstsq(J, -r, rcond=1e-6)[0]
+        except np.linalg.LinAlgError:
+            break
+        lam, better = 1.0, False
+        while lam > 1 / 64:
+            y = np.clip(x + lam * dx, lo, hi)
+            ry = f(y)
+            if np.hypot(*ry) < np.hypot(*r):
+                x, r, better = y, ry, True
+                break
+            lam /= 2
+        if not better:
+            break
+    return x, float(np.hypot(*r))
+
+
+def solve_prediction(mission, atmo):
+    """Solve the ignition time (s after the first guess) and the bank reversal for the landing point, with the burn
+    delta-v and the bank magnitude given. Both bank directions are tried. Returns (t_ign, [dv, sigma, t_rev])."""
+    sv = mission.cfg['solver']
+    dv = sv['dv_ms']
+
+    def miss(t_ign, sigma, t_rev):
+        s = Sim(mission, atmo, t_ign, dv, sigma, t_rev).run()
+        return np.array(offsets_km(s.land[0], s.land[1], *mission.site)) if s.ok else np.array([1e3, 1e3])
+
+    best = None
+    for sign in (1.0, -1.0):
+        sig = sign * sv['sigma_deg']
+        s = Sim(mission, atmo, 0.0, dv, sig, 9e9).run()
+        t_ei = s.crossing(mission.h_ei, s.t_sep, s.t_chute)
+        span = s.t_chute - t_ei
+        # MET runs from ignition, so the entry interface keeps its MET when the ignition time moves
+        f = lambda x: miss(x[0], sig, t_ei + x[1])
+        x, km = newton2(f, [0.0, sv['t_rev_after_ei_guess_s']], [2.0, 10.0], [-900.0, 0.0], [900.0, span])
+        print(f'  bank {sig:+.0f} deg first: ignition {x[0]:+.1f} s  reversal {x[1]:.0f} s after entry (of {span:.0f} s to the parachute)  miss {km:.3f} km', flush=True)
+        # both directions usually reach the site; keep the one whose reversal is nearer the middle of the entry
+        score = km if km > 0.05 else 0.05 * abs(x[1] / span - 0.5)
+        if best is None or score < best[3]:
+            best = (km, x[0], [dv, sig, t_ei + x[1]], score)
+    if best[0] <= 1.0:
+        # put the ignition on a whole second (the page's T0 and the tables are in seconds) and let the bank magnitude
+        # and the reversal take up the fraction: a few tenths of a degree
+        t_whole, sig, t_ei = float(round(best[1])), best[2][1], None
+        s = Sim(mission, atmo, t_whole, dv, sig, best[2][2]).run()
+        t_ei = s.crossing(mission.h_ei, s.t_sep, s.t_chute)
+        lo, hi = sorted((0.5 * sig, 1.5 * sig))
+        x, km = newton2(lambda x: miss(t_whole, x[0], t_ei + x[1]), [sig, best[2][2] - t_ei], [0.5, 10.0], [lo, 0.0], [hi, s.t_chute - t_ei])
+        print(f'  ignition on the whole second {t_whole:+.0f} s: bank {x[0]:+.2f} deg  reversal {x[1]:.0f} s after entry  miss {km:.3f} km', flush=True)
+        if km < 0.05:
+            return t_whole, [dv, x[0], t_ei + x[1]]
+    if best[0] > 1.0:
+        # one reversal cannot close the cross-range: fly one side only and solve the bank magnitude with the ignition time
+        for sign in (1.0, -1.0):
+            lo, hi = sorted((sign * 5.0, sign * 85.0))
+            x, km = newton2(lambda x: miss(x[0], x[1], 9e9), [best[1], sign * 60.0], [2.0, 1.0], [-900.0, lo], [900.0, hi])
+            print(f'  one-sided bank {x[1]:+.1f} deg: ignition {x[0]:+.1f} s  miss {km:.3f} km', flush=True)
+            if km < best[0]:
+                best = (km, x[0], [dv, x[1], 9e9], km)
+    return best[1], best[2]
+
+
 # ---------------------------------------------------------------- export
 def events_and_diag(s, mission, atmo_name):
     m = mission
@@ -390,13 +477,17 @@ def events_and_diag(s, mission, atmo_name):
         v_touchdown_ms=round(land['v_rel'] * 1000, 2),
         chute_descent_s=round(s.t_land - s.t_chute, 1), entry_to_chute_s=round(s.t_chute - t_ei, 1),
         burn_to_ei_s=round(t_ei, 1),
-        landing=[round(s.land[0], 5), round(s.land[1], 5)], landing_utc=iso(t_land_utc),
-        target=list(m.site), target_utc=iso(m.t_land_rep),
+        landing=[round(float(s.land[0]), 5), round(float(s.land[1]), 5)], landing_utc=iso(t_land_utc),
+        target=list(m.site), target_utc=None if m.prediction else iso(m.t_land_rep),
         miss_north_km=round(float(dn), 3), miss_east_km=round(float(de), 3),
-        landing_time_error_s=round((t_land_utc - m.t_land_rep).total_seconds(), 1),
-        ignition_after_om_separation_s=round((s.t0 - m.t_omsep_rep).total_seconds(), 1),
-        om_separation_reported_utc=iso(m.t_omsep_rep),
     )
+    if m.prediction:
+        del diag['target_utc']
+        diag.update(bank_reversal=bool(s.t_rev < s.t_chute))
+    else:
+        diag.update(landing_time_error_s=round((t_land_utc - m.t_land_rep).total_seconds(), 1),
+                    ignition_after_om_separation_s=round((s.t0 - m.t_omsep_rep).total_seconds(), 1),
+                    om_separation_reported_utc=iso(m.t_omsep_rep))
     return events, diag
 
 
@@ -431,7 +522,7 @@ def main():
     ap.add_argument('--tag', default='', help='suffix for output files')
     a = ap.parse_args()
     mission = Mission(a.mission)
-    atmo = Atmosphere(a.atmo, site=mission.site, epoch=mission.cfg['reported']['landing_utc'],
+    atmo = Atmosphere(a.atmo, site=mission.site, epoch=mission.atmo_epoch,
                       cache=ROOT / 'model' / f'atmo_msis_{mission.id}.json')
     print('atmosphere:', atmo.describe)
     out = ROOT / 'out'
@@ -439,7 +530,9 @@ def main():
     sol_path = out / f'{mission.id}_solution{a.tag}.json'
     t_ign = (utc(f"{mission.cfg['date']}T{a.tign}Z") - mission.t_ref).total_seconds() if a.tign else 0.0
     if a.nominal:
-        x = [a.dv or mission.cfg['solver']['dv_guess_ms'], a.sigma, a.trev]
+        x = [a.dv or mission.cfg['solver'].get('dv_guess_ms') or mission.cfg['solver']['dv_ms'], a.sigma, a.trev]
+    elif a.solve and mission.prediction:
+        t_ign, x = solve_prediction(mission, atmo)
     elif a.solve:
         x = solve(mission, atmo, t_ign)
     else:
@@ -449,13 +542,13 @@ def main():
     if not s.ok:
         raise SystemExit('run failed (no touchdown)')
     events, diag = events_and_diag(s, mission, atmo.describe)
-    print(f"ignition {diag['t_ign_utc']} ({diag['ignition_after_om_separation_s']:+.0f} s after reported OM separation)  dv {diag['dv_ms']} m/s  "
-          f"bank {diag['bank_deg']:+.1f} deg reversing at T+{diag['bank_reversal_met']:.0f} s  perigee {diag['deorbit_perigee_km']} km")
+    print(f"ignition {diag['t_ign_utc']}" + ('' if mission.prediction else f" ({diag['ignition_after_om_separation_s']:+.0f} s after reported OM separation)") + f"  dv {diag['dv_ms']} m/s  "
+          f"bank {diag['bank_deg']:+.1f} deg" + (f" reversing at T+{diag['bank_reversal_met']:.0f} s" if s.t_rev < s.t_chute else ', no reversal') + f"  perigee {diag['deorbit_perigee_km']} km")
     print(f"EI {events[[e['key'] for e in events].index('entry_interface')]['utc']} gamma {diag['ei_fpa_inertial_deg']} deg (rel {diag['ei_fpa_relative_deg']})  "
           f"v {diag['ei_v_inertial_kms']} km/s  range to site {diag['ei_range_to_site_km']} km")
     print(f"max g {diag['max_g']} at {diag['max_g_alt_km']} km  peak heating {diag['peak_heating_Wcm2']} W/cm2 at {diag['peak_heating_alt_km']} km  blackout {diag['blackout_s']} s")
     print(f"chute at {diag['v_at_chute_ms']} m/s, main at {diag['v_at_main_ms']} m/s, touchdown {diag['v_touchdown_ms']} m/s; chute descent {diag['chute_descent_s']} s")
-    print(f"landing {diag['landing_utc']} at {diag['landing']}  miss N {diag['miss_north_km']:+.2f} E {diag['miss_east_km']:+.2f} km  time error {diag['landing_time_error_s']:+.1f} s")
+    print(f"landing {diag['landing_utc']} at {diag['landing']}  miss N {diag['miss_north_km']:+.2f} E {diag['miss_east_km']:+.2f} km" + ('' if mission.prediction else f"  time error {diag['landing_time_error_s']:+.1f} s"))
     for e in events:
         print(f"  T+{e['met']:7.1f}  {e['utc'][11:19]}  {e['label']}")
     if a.solve or a.export or a.nominal:

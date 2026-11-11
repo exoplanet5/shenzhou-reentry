@@ -43,6 +43,8 @@ export function footprintDeg(hKm, elevDeg) {
   const e = elevDeg * D2R;
   return (Math.acos(RE * Math.cos(e) / (RE + Math.max(0, hKm))) - e) * R2D;
 }
+// Minimum observer elevation (deg) for the globe visibility circle and sky-chart pass badges.
+export const MIN_ELEVATION_DEG = 10;
 
 const p2 = (n) => String(n).padStart(2, '0');
 export function fmtMET(s) {
